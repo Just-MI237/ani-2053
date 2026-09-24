@@ -48,8 +48,8 @@ Deux lignes précisent le contenu et la norme :
 language("C++")
 cppdialect("C++20")
 
-Le projet est donc écrit en C++ et utilise la norme C++20. Je ne sais pas
-exactement quelle version précise de C++20 est visée ?
+Le projet est donc écrit en C++ et utilise la norme C++20. Quelle version
+précise de C++20 est visée ?
 
 La ligne suivante dit où vit le projet :
 
@@ -78,8 +78,8 @@ pchsource("pch/pch.cpp")
 
 PCH veut dire precompiled header. C'est un mécanisme qui prépare certains
 en-têtes à l'avance pour accélérer la compilation. Le .h est l'en-tête
-précompilé, et le .cpp est le fichier qui sert à le construire. Je ne sais
-pas ce que contient exactement le fichier pch.h ?
+précompilé, et le .cpp est le fichier qui sert à le construire. Que
+contient exactement le fichier pch.h ?
 
 Enfin, deux lignes disent où vont les fichiers produits :
 
@@ -88,9 +88,9 @@ targetdir(...)
 
 objdir est le dossier des fichiers intermédiaires pendant la compilation.
 targetdir est le dossier du fichier final produit, ici une bibliothèque
-statique. Les motifs entre pourcents et accolades sont des variables
-remplacées au moment de la construction. Par exemple la variable
-cfg.buildcfg vaut Debug ou Release selon la configuration.
+statique. Les variables de la forme %{...} sont remplacées au moment de
+la construction. Par exemple la variable cfg.buildcfg vaut Debug ou
+Release selon la configuration.
 
 Dépendances
 
@@ -129,15 +129,15 @@ Pour Windows classique (pas UWP, pas Xbox), on utilise la chaîne
 TC_WINDOWS, définie dans jengaconfig. Le filtre exclut explicitement UWP,
 XboxSeries et XboxOne.
 
-Pour UWP, on utilise la chaîne xbox-clang. Je ne suis pas sûr de pourquoi
-la même chaîne sert pour UWP et pour Xbox ?
+Pour UWP, on utilise la chaîne xbox-clang. Pourquoi la même chaîne
+sert-elle pour UWP et pour Xbox ?
 
 Pour macOS, on utilise clang-native.
 
 Pour Android, on désactive le PCH en mettant des chaînes vides, puis on
 utilise android-ndk. Un commentaire dans le fichier explique que c'est un
-contournement à cause du NDK r27 et de clang 18. Je ne sais pas exactement
-ce qui pose problème entre le NDK et le PCH ?
+contournement à cause du NDK r27 et de clang 18. Qu'est-ce qui pose
+problème entre le NDK et le PCH ?
 
 Pour HarmonyOS, même chose, avec le NDK de Huawei.
 
@@ -153,8 +153,8 @@ désactive les optimisations, et on garde les symboles de débogage.
 En Release, on définit NDEBUG et NKENTSEU_RELEASE, on optimise pour la
 vitesse, et on retire les symboles.
 
-Je ne sais pas comment sont générés les noms NKENTSEU_DEBUG et
-NKENTSEU_RELEASE, qui ne sont pas standards ?
+Comment sont générés les noms NKENTSEU_DEBUG et NKENTSEU_RELEASE, qui
+ne sont pas standards ?
 
 Tests
 
