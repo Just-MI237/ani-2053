@@ -8,7 +8,7 @@ Kernel/Foundation/NKPlatform/NKPlatform.jenga
 
 Voici le contenu du fichier, annote ligne par ligne.
 
---- En-tete du fichier ---
+En-tete du fichier
 
 #!/usr/bin/env python3
 C'est la ligne qui dit au systeme que ce fichier est un script Python.
@@ -23,7 +23,7 @@ Le bloc entre triples guillemets est une description du module. Il dit :
 NKPlatform detecte OS, architecture, compilateur et CPU. C'est un module
 de fondation, sans dependances. Langage C++20.
 
---- Les imports ---
+Les imports
 
 from Jenga import *
 Importe les fonctions de Jenga (project, files, filter, etc.).
@@ -32,7 +32,7 @@ from jengaconfig import *
 Importe les fonctions propres au depot Nkentseu (nkentseudependson,
 TC_WINDOWS, etc.).
 
---- Le projet ---
+Le projet
 
 with project("NKPlatform"):
 Declare un projet nomme NKPlatform. Tout ce qui est indente en dessous
@@ -49,7 +49,7 @@ Le projet utilise la norme C++20.
 Le projet vit dans le dossier ou se trouve ce fichier .jenga.
 Le point veut dire "ici".
 
---- Les dependances ---
+Les dependances
 
     nkentseudependson(
         [],
@@ -61,7 +61,7 @@ que NKPlatform ne depend d'aucun autre module. C'est coherent : c'est le
 socle. selfexport est le nom de la macro d'export du module. extra_includes
 ajoute deux dossiers ou le compilateur cherchera les en-tetes.
 
---- L'en-tete precompile ---
+L'en-tete precompile
 
     pchheader("pch/pch.h")
     pchsource("pch/pch.cpp")
@@ -69,7 +69,7 @@ PCH veut dire precompiled header. C'est un systeme qui accelere la
 compilation en preparant certains en-tetes a l'avance. Le .h est l'en-tete
 et le .cpp est le fichier qui sert a le construire.
 
---- Les sources ---
+Les sources
 
     files([
         "src/NKPlatform/**.cpp",
@@ -79,7 +79,7 @@ C'est la liste des fichiers source du projet. Les motifs veulent dire :
 tous les .cpp et tous les .h dans src/NKPlatform et ses sous-dossiers.
 Le double asterisque ** veut dire "et tous les sous-dossiers".
 
---- Ou vont les fichiers ---
+Ou vont les fichiers
 
     objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
     targetdir("%{wks.location}/Build/Lib/%{cfg.buildcfg}-%{cfg.system}")
@@ -88,7 +88,7 @@ compilation. targetdir est l'endroit ou va le fichier final produit
 (ici une bibliotheque statique). Les %{...} sont des variables qui sont
 remplacees au moment de la construction.
 
---- Le filtre UWP ---
+Le filtre UWP
 
     with filter("system:Windows && options:windows-runtime=uwp"):
         objdir(...)
@@ -96,7 +96,7 @@ remplacees au moment de la construction.
 Quand on compile pour Windows en mode UWP, on change les dossiers de
 sortie pour ne pas ecraser ceux de Windows normal.
 
---- Les chaines de compilation ---
+Les chaines de compilation
 
     with filter("system:Windows && !options:windows-runtime=uwp && !system:XboxSeries && !system:XboxOne"):
         usetoolchain(TC_WINDOWS)
@@ -137,7 +137,7 @@ Pour le Web, utilise la chaine emscripten.
         usetoolchain("xbox-clang")
 Pour Xbox Series et Xbox One, utilise la chaine xbox-clang.
 
---- Les configurations ---
+Les configurations
 
     with filter("config:Debug"):
         defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
@@ -153,7 +153,7 @@ on desactive les optimisations, et on garde les symboles de debogage.
 En Release : on definit NDEBUG et NKENTSEU_RELEASE, on optimise pour la
 vitesse, et on retire les symboles.
 
---- Les tests ---
+Les tests
 
     # Tests unitaires/benchmarks (desktop uniquement)
     with filter("(system:Linux || system:macOS || (system:Windows && !options:windows-runtime=uwp && !system:XboxSeries && !system:XboxOne)) && !system:Android && !system:iOS || system:Web"):
@@ -164,7 +164,7 @@ macOS, Windows classique et Web. Pas sur Android, iOS, UWP ou Xbox.
 En dessous, with test() declare une suite de tests attachee au projet,
 et testfiles liste les fichiers de test.
 
---- Ce que je ne comprends pas encore ---
+Ce que je ne comprends pas encore
 
 ? Pourquoi la meme chaine de compilation xbox-clang est utilisee pour
   UWP et pour Xbox.
