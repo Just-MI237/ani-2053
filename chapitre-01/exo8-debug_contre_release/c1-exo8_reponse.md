@@ -1,9 +1,7 @@
 Exercice 8 - Debug contre Release
 
-J'ai construit le meme projet MonEssai dans les deux configurations.
-J'ai compare la taille du binaire et le temps de construction, puis
-j'ai cherche dans les fichiers .jenga les lignes qui expliquent les
-differences.
+J'ai construit le meme projet MonEssai dans les deux configurations,
+et j'ai compare la taille du binaire et le temps de construction.
 
 Datation de la mesure
 
@@ -15,12 +13,12 @@ Sortie brute :
 
 9c3fad3 2026-09-13
 
-Construction en Debug
+Configuration Debug
 
 Commande :
 
     rm -rf Build/
-    time jenga build --project MonEssai --config Debug
+    jenga build --project MonEssai --config Debug
     ls -l Build/Bin/Debug-Linux/MonEssai/MonEssai
 
 Sortie brute complete, depuis la banniere Jenga jusqu'a la ligne du ls -l :
@@ -56,9 +54,9 @@ Build Order (2 projects):
 ╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 
 ℹ Found 7 source file(s)
-✓   [1/7] Compiled: NkArchDetect.cpp
-✓   [2/7] Compiled: NkCGXDetect.cpp
-✓   [3/7] Compiled: NkCompilerDetect.cpp
+✓   [1/7] Compiled: NkCompilerDetect.cpp
+✓   [2/7] Compiled: NkArchDetect.cpp
+✓   [3/7] Compiled: NkCGXDetect.cpp
 ✓   [4/7] Compiled: NkEndianness.cpp
 ✓   [5/7] Compiled: NkEnv.cpp
 ✓   [6/7] Compiled: NkPlatformConfig.cpp
@@ -67,7 +65,7 @@ Build Order (2 projects):
 ✓ Built: Build/Lib/Debug-Linux/NKPlatform.a
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│  ✓ Build Successful                                                             Time: 0.40s  │
+│  ✓ Build Successful                                                             Time: 0.39s  │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -80,29 +78,25 @@ Build Order (2 projects):
 ✓ Built: Build/Bin/Debug-Linux/MonEssai/MonEssai
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│  ✓ Build Successful                                                             Time: 0.31s  │
+│  ✓ Build Successful                                                             Time: 0.28s  │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ════════════════════════════════════════════════════════════════════════════════
                                 BUILD COMPLETED                                 
 ════════════════════════════════════════════════════════════════════════════════
 Projects Built:  2/2
-Time:           0.71s
+Time:           0.67s
 Status:         ✓ SUCCESS
 ════════════════════════════════════════════════════════════════════════════════
 
+-rwxr-xr-x 1 justmaxit justmaxit 28168 Sep 25 05:09 Build/Bin/Debug-Linux/MonEssai/MonEssai
 
-real	0m7.064s
-user	0m1.533s
-sys	0m1.074s
--rwxr-xr-x 1 justmaxit justmaxit 28168 Sep 25 05:00 Build/Bin/Debug-Linux/MonEssai/MonEssai
-
-Construction en Release
+Configuration Release
 
 Commande :
 
     rm -rf Build/
-    time jenga build --project MonEssai --config Release
+    jenga build --project MonEssai --config Release
     ls -l Build/Bin/Release-Linux/MonEssai/MonEssai
 
 Sortie brute complete :
@@ -149,7 +143,7 @@ Build Order (2 projects):
 ✓ Built: Build/Lib/Release-Linux/NKPlatform.a
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│  ✓ Build Successful                                                             Time: 0.32s  │
+│  ✓ Build Successful                                                             Time: 0.33s  │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ╔══════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -162,35 +156,34 @@ Build Order (2 projects):
 ✓ Built: Build/Bin/Release-Linux/MonEssai/MonEssai
 
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
-│  ✓ Build Successful                                                             Time: 0.29s  │
+│  ✓ Build Successful                                                             Time: 0.27s  │
 └──────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ════════════════════════════════════════════════════════════════════════════════
                                 BUILD COMPLETED                                 
 ════════════════════════════════════════════════════════════════════════════════
 Projects Built:  2/2
-Time:           0.61s
+Time:           0.60s
 Status:         ✓ SUCCESS
 ════════════════════════════════════════════════════════════════════════════════
 
-
-real	0m5.125s
-user	0m1.495s
-sys	0m0.684s
--rwxr-xr-x 1 justmaxit justmaxit 19768 Sep 25 05:00 Build/Bin/Release-Linux/MonEssai/MonEssai
+-rwxr-xr-x 1 justmaxit justmaxit 19768 Sep 25 05:10 Build/Bin/Release-Linux/MonEssai/MonEssai
 
 Les quatre nombres
 
-Debug   : 28168 octets, real 0m7.080s
-Release : 19768 octets, real 0m7.142s
+Debug   : 28168 octets, Time 0.84s
+Release : 19768 octets, Time 0.79s
 
 Le binaire Release est environ 30 pour cent plus petit.
 Les deux temps sont presque identiques.
 
 Les lignes du .jenga qui expliquent les tailles
 
-J'ai cherche les mots optimize, symbols et defines dans les fichiers
-.jenga du projet et de ses dependances. Sortie brute :
+Commande :
+
+    grep -rn optimize symbols defines --include=*.jenga Applications/MonEssai/ Kernel/Foundation/NKPlatform/ Nkentseu.jenga
+
+Sortie brute :
 
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:62:        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:63:        optimize("Off")
