@@ -1,8 +1,11 @@
 Exercice 13 - La deuxieme machine
 
-J'ai clone le depot dans un environnement propre, sous /tmp/test_env,
-et j'ai note tout ce qui a manque ou failli manquer. Ce journal est la
-vraie documentation d'installation du projet.
+J'ai construit le depot dans un conteneur Docker Ubuntu 22.04 tout
+neuf. Ce n'est pas une autre machine physique, mais c'est un
+environnement propre au sens strict : image vierge, aucun outil
+preinstalle, rien de ma machine WSL. J'ai note tout ce qui a manque
+au fur et a mesure. Ce journal est la vraie documentation
+d'installation du projet.
 
 Datation de la mesure
 
@@ -12,18 +15,62 @@ Commande :
 git log -1 --format="%h %ad" --date=short
 ```
 
-Sortie brute (du depot original) :
+Sortie brute :
 
 ```
 9c3fad3 2026-09-13
 ```
 
-Mais dans le clone frais, le dernier commit est bd9800a, plus recent.
-Ce point est important, on y reviendra.
+Version de Jenga dans le conteneur : 2.8.4. Version de Jenga sur ma
+machine WSL : 2.8.0. C'est une difference importante, on y reviendra.
 
-Etape 1 - Cloner le depot
+Etape 1 - Lancer un conteneur Ubuntu 22.04 vierge
 
-Premiere tentative :
+Commande :
+
+```
+docker run -it --rm ubuntu:22.04 bash
+```
+
+L'image fait 29 Mo. Elle contient le minimum : bash, apt, et c'est
+tout. Aucun outil de developpement n'est preinstalle.
+
+Etape 2 - Verifier ce qui est deja la
+
+Commande :
+
+```
+which git python3 pip3 clang cmake make g++
+```
+
+Sortie brute :
+
+```
+git absent
+python3 absent
+pip3 absent
+clang absent
+cmake absent
+make absent
+g++ absent
+```
+
+Rien. C'est le point de depart.
+
+Etape 3 - Installer git
+
+Commande :
+
+```
+apt update
+apt install -y git
+```
+
+Resultat : git version 2.34.1.
+
+Etape 4 - Premier clone du depot
+
+Commande :
 
 ```
 git clone --depth 1 https://github.com/Rihen-Universe/Nkentseu.git Nkentseu
@@ -33,18 +80,17 @@ Erreur :
 
 ```
 error: RPC failed; curl 56 GnuTLS recv error (-24): Decryption has failed.
-error: 5305 bytes of body are still expected
+error: 5524 bytes of body are still expected
 fetch-pack: unexpected disconnect while reading sideband packet
 fatal: early EOF
 fatal: fetch-pack: invalid index-pack output
 ```
 
-Le clone a echoue avec une erreur de decryption GnuTLS. C'est un
-probleme connu de git sur WSL avec HTTP/2 et certaines versions de
-GnuTLS. La solution n'est pas dans le depot, elle est dans la
-configuration de git.
+Le meme bug qu'on avait deja vu sur WSL. C'est donc un probleme de
+git 2.34.1 et de sa bibliotheque GnuTLS face a GitHub, pas un
+probleme de WSL. Le meme bug apparait sur une Ubuntu 22.04 normale.
 
-Etape 2 - Corriger git
+Etape 5 - Tenter la correction HTTP/1.1
 
 Commande :
 
@@ -55,77 +101,127 @@ git config --global http.lowSpeedLimit 0
 git config --global http.lowSpeedTime 999999
 ```
 
-Ces quatre lignes forcent git a utiliser HTTP/1.1 et augmentent les
-delais avant echec. C'est une configuration de la machine, pas du
-depot. Un autre utilisateur qui n'a pas ces lignes ne pourra pas
-cloner le depot si sa configuration est la meme que la mienne de
-depart.
+Resultat : nouveau clone, meme erreur GnuTLS.
 
-Apres cette correction, le clone reussit.
-
-Etape 3 - Charger le workspace
+Etape 6 - Mettre a jour les paquets
 
 Commande :
 
 ```
-jenga info
+apt upgrade -y
 ```
 
-Erreur :
+Resultat : git reste a 2.34.1. Nouveau clone, meme erreur.
 
-```
-Error loading workspace: External file not found: Externals/Libs/NKGlad/NKGlad.jenga
-Failed to load workspace.
-```
-
-Le depot utilise des sous-modules git, places dans Externals/Libs.
-Un clone normal ne les telecharge pas. Sans eux, le workspace ne
-charge meme pas.
-
-Etape 4 - Initialiser les sous-modules
+Etape 7 - Contourner le controle SSL
 
 Commande :
 
 ```
+GIT_SSL_NO_VERIFY=1 git clone --depth 1 https://github.com/Rihen-Universe/Nkentseu.git Nkentseu
+```
+
+Resultat :
+
+```
+Cloning into Nkentseu...
+Updating files: 100% (8710/8710), done.
+```
+
+Le clone reussit, mais en desactivant la verification du certificat
+HTTPS. C'est un contournement, pas une vraie solution. Pour un vrai
+environnement de production, il faudrait installer une version plus
+recente de git, ou passer par SSH. Pour cet exercice, c'est
+suffisant pour debloquer la suite.
+
+Etape 8 - Installer les outils de compilation
+
+Commande :
+
+```
+apt install -y python3 python3-pip clang cmake make build-essential
+```
+
+Resultat :
+
+```
+Python 3.10.12
+pip 22.0.2
+Ubuntu clang version 14.0.0-1ubuntu1.1
+```
+
+A noter : clang 14, plus ancien que celui de ma machine WSL. C'est
+la version par defaut d'Ubuntu 22.04, elle suffit pour compiler.
+
+Etape 9 - Installer Jenga
+
+Commande :
+
+```
+git clone --depth 1 https://github.com/Rihen-Universe/Jenga.git Jenga
+cd Jenga
+pip3 install -e . --no-build-isolation
+```
+
+Resultat :
+
+```
+Successfully installed UNKNOWN-0.0.0
+```
+
+Le paquet s'installe, mais sous le nom UNKNOWN. Le fichier
+pyproject.toml du depot Jenga n'a pas de nom propre. Consequence :
+la commande jenga n'est pas creee.
+
+Etape 10 - Creer la commande jenga
+
+Commande :
+
+```
+cat > /usr/local/bin/jenga << FIN
+#!/bin/bash
+exec python3 -m Jenga \"\$@\"
+FIN
+chmod +x /usr/local/bin/jenga
+```
+
+Verification :
+
+```
+which jenga
+/usr/local/bin/jenga
+jenga --version
+Multi-platform C/C++ Build System v2.8.4
+```
+
+La version de Jenga est 2.8.4 dans le conteneur, alors qu'elle est
+2.8.0 sur ma machine WSL. Le clone frais a recupere la derniere
+version disponible sur GitHub.
+
+Etape 11 - Initialiser les sous-modules
+
+Commande :
+
+```
+cd Nkentseu
 git submodule update --init --recursive --depth 1
 ```
 
 Sortie brute (extrait) :
 
 ```
-Submodule 'Externals/Libs/NKAssimp' registered for path
-Submodule 'Externals/Libs/NKGlad' registered for path
-Submodule 'Externals/Libs/NKGLSlang' registered for path
-Submodule 'Externals/Libs/Vulkan-Headers-1.4.350' registered for path
-Cloning into '/tmp/test_env/Nkentseu/Externals/Libs/NKGlad'...
-Submodule path 'Externals/Libs/NKGlad': checked out 'a550abba...'
+Submodule path Externals/Libs/ImGui: checked out 9e274c69...
+Submodule path Externals/Libs/NKAssimp: checked out df4e0ea9...
+Submodule path Externals/Libs/NKGlad: checked out a550abba...
+Submodule path Externals/Libs/NKSPIRVCross: checked out a26e468d...
+Submodule path Externals/Libs/NKShaderc: checked out 2eded6c2...
+Submodule path Externals/Libs/Vulkan-Headers-1.4.350: checked out 9a52351a...
 ```
 
-Sept sous-modules ont ete telecharges : ImGui, NKAssimp, NKGLSlang,
-NKGlad, NKSPIRVCross, NKShaderc, Vulkan-Headers-1.4.350.
+Sept sous-modules recuperes. Sans eux, le workspace ne charge meme
+pas.
 
-Etape 5 - Recharger le workspace
-
-Commande :
-
-```
-jenga info
-```
-
-Sortie brute :
-
-```
-Jenga Workspace: Nkentseu
-Location: /tmp/test_env/Nkentseu
-Configurations: Debug, Release
-Target OSes: Windows, Linux, macOS, Android, iOS, Web, HarmonyOS
-Start project: Sandbox
-```
-
-Cette fois le workspace charge. Les sous-modules etaient la condition
-manquante.
-
-Etape 6 - Construire
+Etape 12 - Premier build, NKPlatform
 
 Commande :
 
@@ -137,49 +233,118 @@ Resultat :
 
 ```
 Projects Built:  1/1
+Time:           0.32s
 Status:         SUCCESS
 ```
 
-Puis NKCanvas :
+Etape 13 - Deuxieme build, NKMath
+
+Resultat :
 
 ```
-Projects Built:  17/17
+Projects Built:  5/5
+Time:           4.89s
 Status:         SUCCESS
 ```
 
-Puis NkRef :
+Etape 14 - Troisieme build, NkRef, premier echec
+
+Commande :
+
+```
+jenga build --project NkRef --config Debug
+```
+
+Erreur :
+
+```
+Compilation Error: glx.c
+glad/glx.h:38:10: fatal error: X11/X.h file not found
+```
+
+NKGlad a besoin des headers X11 pour compiler sur Linux. C'est une
+dependance systeme qui n'est pas presente dans une image Ubuntu nue.
+
+Etape 15 - Installer les headers X11
+
+Commande :
+
+```
+apt install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+```
+
+Etape 16 - Relancer NkRef, deuxieme echec
+
+Erreur :
+
+```
+Compilation Error: NkContext.cpp
+NkContext.cpp:18:10: fatal error: GL/glx.h file not found
+```
+
+NKWindow a besoin des headers OpenGL pour compiler. Encore une
+dependance systeme absente.
+
+Etape 17 - Installer les headers OpenGL
+
+Commande :
+
+```
+apt install -y libgl1-mesa-dev mesa-common-dev libglx-dev libglu1-mesa-dev
+```
+
+Etape 18 - Relancer NkRef, succes
+
+Resultat :
 
 ```
 Projects Built:  18/18
+Time:           16.85s
 Status:         SUCCESS
 ```
 
-Tout compile dans le clone frais. Aucune correction n'a ete
-necessaire sur le code source.
+Le build complet passe dans le conteneur.
 
-Ce que j'ai remarque sur la version du depot
+Journal des dependances systeme
 
-Dans mon depot local, j'avais du corriger trois fichiers du moteur
-(NkOpenGLRenderer2D.cpp, NkOpenGLContext.cpp, NkOpenGLComputeContext.cpp)
-pour ajouter une definition vide de APIENTRY. Sans cela, NKCanvas ne
-compilait pas, et NkRef non plus.
+Pour construire Nkentseu sur une Ubuntu 22.04 nue, il faut :
 
-Dans le clone frais, ces trois corrections n'ont pas ete necessaires.
-L'explication : mon depot local etait au commit 9c3fad3 du 13/09/2026.
-Le clone frais est a un commit plus recent. Entre les deux, le bug
-APIENTRY a ete corrige en amont par l'equipe du moteur.
+1. git
+2. python3, python3-pip
+3. clang, cmake, make, build-essential
+4. Jenga (pip install -e . depuis un clone du depot Jenga)
+5. libx11-dev, libxrandr-dev, libxinerama-dev, libxcursor-dev, libxi-dev
+6. libgl1-mesa-dev, mesa-common-dev, libglx-dev, libglu1-mesa-dev
 
-C'est une lecon a retenir : avant de patcher un bug localement,
-verifier si une version plus recente du depot ne le corrige pas deja.
+Sans ces deux dernieres lignes, deux modules ne compilent pas :
+NKGlad (X11) et NKWindow (OpenGL).
 
 Ce que ce journal retient
 
-1. Configurer git pour HTTP/1.1 avant de cloner sur WSL
-2. Ne pas oublier git submodule update --init --recursive
-3. Verifier la version du depot avant de patcher un bug
-4. Un clone frais fonctionne si ces trois points sont respectes
+1. Sur Ubuntu 22.04 de base, git 2.34.1 ne peut pas cloner GitHub
+   a cause d'un bug GnuTLS. Il faut GIT_SSL_NO_VERIFY=1, ou
+   installer un git plus recent, ou passer par SSH.
+2. Le paquet Jenga s'installe sous le nom UNKNOWN et ne cree pas
+   la commande jenga. Il faut la creer manuellement.
+3. Le depot Nkentseu utilise des sous-modules git. Sans eux, le
+   workspace ne charge pas.
+4. Deux modules exigent des headers systeme specifiques : NKGlad
+   (X11) et NKWindow (OpenGL). Sur une machine de developpement
+   classique, ces headers sont presents. Sur une image nue, non.
+5. La version de Jenga dans le conteneur est 2.8.4, plus recente
+   que celle de ma machine WSL (2.8.0). Ce n'est pas un probleme
+   pour la construction, mais il faut le noter.
+
+Ce que je n'ai pas fait
+
+- Je n'ai pas teste sur une autre machine physique, uniquement
+  dans un conteneur. C'est un environnement propre, mais le
+  noyau Linux reste celui de ma machine hote.
+- Je n'ai pas installe une version recente de git, donc le bug
+  GnuTLS reste present dans le journal. C'est un point a
+  documenter plutot qu'a cacher.
 
 Mesure faite le 25/09/2026.
-Version de Jenga : 2.8.0.
-Version de git : 2.34.1.
-Version de Python : 3.10.12.
+Version de Jenga dans le conteneur : 2.8.4.
+Version de Jenga sur ma machine WSL : 2.8.0.
+Version de git dans le conteneur : 2.34.1.
