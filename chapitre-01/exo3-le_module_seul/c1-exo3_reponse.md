@@ -1,48 +1,55 @@
 Exercice 3 - Le module seul
 
-J'ai lancé la commande :
+J'ai lance la commande :
 
-jenga build --project NKMath --config Debug
+    jenga build --project NKMath --config Debug
 
-Voici l'ordre de construction que Jenga a affiché avant de compiler :
+Sortie brute de l'outil, collee telle quelle :
 
-Build Order (5 projects):
-  1. NKPlatform
-  2. NKCore (depends: NKPlatform)
-  3. NKMemory (depends: NKCore, NKPlatform)
-  4. NKContainers (depends: NKCore, NKMemory, NKPlatform)
-  5. NKMath (depends: NKContainers, NKCore, NKMemory, NKPlatform)
+    Build Order (5 projects):
+      1. NKPlatform [STATIC_LIB] →
+      2. NKCore [STATIC_LIB] (depends: NKPlatform) →
+      3. NKMemory [STATIC_LIB] (depends: NKCore, NKPlatform) →
+      4. NKContainers [STATIC_LIB] (depends: NKCore, NKMemory, NKPlatform) →
+      5. NKMath [STATIC_LIB] (depends: NKContainers, NKCore, NKMemory, NKPlatform)
 
-La compilation a réussi : 5 projets sur 5, en 5,66 secondes.
+Bilan complet affiche a la fin du build :
 
-Voici les dépendances de NKMath sous forme hiérarchique, du plus bas au plus haut :
+    ════════════════════════════════════════════════════════════════
+                                    BUILD COMPLETED
+    ════════════════════════════════════════════════════════════════
+    Projects Built:  5/5
+    Time:           5.10s
+    Status:         ✓ SUCCESS
+    ════════════════════════════════════════════════════════════════
 
-- NKPlatform (ne dépend de rien)
-  - NKCore (dépend de NKPlatform)
-    - NKMemory (dépend de NKCore et NKPlatform)
-      - NKContainers (dépend de NKCore, NKMemory et NKPlatform)
-        - NKMath (dépend de NKContainers, NKCore, NKMemory et NKPlatform)
+Voici l'arbre de construction, lu du sommet (construit en dernier) vers
+le socle (construit en premier) :
 
-Une autre façon de voir la même chose, en partant de NKMath et en descendant :
+- NKMath (depend de NKContainers, NKCore, NKMemory, NKPlatform)
+  - NKContainers (depend de NKCore, NKMemory, NKPlatform)
+    - NKMemory (depend de NKCore, NKPlatform)
+      - NKCore (depend de NKPlatform)
+        - NKPlatform (ne depend de rien)
 
-- NKMath dépend de :
-  - NKContainers
-  - NKCore
-  - NKMemory
-  - NKPlatform
+Ce que cet arbre montre :
 
-Ce que ça montre :
+NKPlatform est tout en bas, c'est le socle. Il ne depend de rien et
+c'est le premier construit. Tout le reste repose dessus.
 
-NKMath ne dépend pas d'une seule chaîne. Il dépend directement de quatre
-modules différents. C'est pour cette raison que la figure n'est pas une
-simple colonne : plusieurs branches partent de NKMath et convergent toutes
-vers NKPlatform, qui est le socle commun.
+NKMath est tout en haut. Il depend directement de quatre modules
+differents, qui reposent tous sur NKPlatform. C'est pour cette raison
+que la figure n'est pas une simple colonne : plusieurs branches
+partent de NKMath et convergent toutes vers NKPlatform.
 
-NKPlatform est construit en premier parce qu'il ne dépend de rien. NKMath
-est construit en dernier parce qu'il dépend de tout le reste. C'est Jenga
-qui calcule cet ordre à partir des dependson déclarés dans les fichiers
-.jenga, ce n'est pas quelqu'un qui l'a écrit à la main.
+Si on retire NKPlatform du socle, tout s'effondre. Si on retire
+NKMemory, seuls NKContainers et NKMath tombent, mais NKCore et
+NKPlatform tiennent encore.
 
-Mesure faite le 24/09/2026.
+C'est Jenga qui calcule cet ordre a partir des dependances declarees
+dans les fichiers .jenga, ce n'est pas quelqu'un qui l'a ecrit a la
+main.
+
+Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
-Dernier commit du dépôt Nkentseu : 9c3fad3, daté du 2026-09-13.
+Dernier commit du depot Nkentseu : 9c3fad3, date du 2026-09-13.
