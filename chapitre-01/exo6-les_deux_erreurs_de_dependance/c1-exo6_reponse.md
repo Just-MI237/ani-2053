@@ -1,6 +1,6 @@
 Exercice 6 - Les deux erreurs de dependance
 
-Pour cet exercice, j'ai modifie le projet MonEssai pour qu'il utilise
+Pour cet exercice, j'ai modifie le projet MonEssai pour qu'il appelle
 reellement une fonction de NKPlatform. J'ai choisi GetPlatformConfig,
 declaree dans NkPlatformConfig.h et definie dans NkPlatformConfig.cpp.
 Comme le code est dans un fichier .cpp, un vrai lien avec la
@@ -17,8 +17,8 @@ int main()
     return 0;
 }
 
-J'ai teste trois configurations l'une apres l'autre, en supprimant le
-dossier Build entre chaque test pour qu'un ancien fichier .a ne fausse
+J'ai teste trois configurations l'une apres l'autre. Entre chaque test,
+j'ai supprime le dossier Build pour qu'un ancien fichier .a ne fausse
 pas le resultat.
 
 Cas 0 : dependson et links presents
@@ -132,12 +132,11 @@ workspace, dans cette version de Jenga, dependson seul suffit.
 
 Une remarque sur la version de Jenga
 
-Le chapitre 1 presente dependson et links comme deux mecanismes
-distincts. C'est vrai dans le principe. Dans Jenga 2.8.0 tel qu'il est
-installe ici, le comportement se superpose pour les projets du
-workspace. Ce detail est utile a connaitre : sur une autre version, on
-pourrait observer une erreur undefined reference a la place du succes
-du Cas 2.
+Dans le principe, dependson et links sont deux mecanismes distincts.
+Dans Jenga 2.8.0 tel qu'il est installe ici, le comportement se
+superpose pour les projets du workspace. Ce detail est utile a
+connaitre : sur une autre version, on pourrait observer une erreur
+undefined reference a la place du succes du Cas 2.
 
 Etat du projet a la fin
 
