@@ -114,5 +114,56 @@ pan fonctionnent. Pour le reste, il manque beaucoup de ce qu'on
 attend d'un outil de dessin : import d'image, formes geometriques,
 gomme precise, export. C'est une version de developpement.
 
+
+Preuves brutes de la session
+
+Commande :
+
+    jenga run NkRef --config Debug --platform x86_64 --target Linux
+
+Extrait du terminal, au lancement :
+
+    [NkRef] police en-tete : chargee
+    [NkFontEmbedded] Police 'DroidSans' chargee : 17px
+    [NkFontAtlas] Build(): 723 glyphes rasterises, atlas 1024x1024,
+      745 points non nuls
+    [NkOpenGLRenderer2D] texture 1024x1024 : AUCUN pixel visible dans
+      toute l'image
+    [NkFontEmbedded] Police 'DroidSans' chargee : 15px
+    [NkFontAtlas] Build(): 190 glyphes rasterises, atlas 512x512,
+      120 points non nuls
+
+Extrait du terminal, pendant la session, quand j'ai essaye de coller
+une image trois fois de suite :
+
+    [NkRef] presse-papiers : pas d'image
+    [NkRef] presse-papiers : pas d'image
+    [NkRef] presse-papiers : pas d'image
+
+Extrait du terminal, a la fin de la session :
+
+    [NkOpenGLRenderer2D] DeleteGLTexture id=2
+    [NkOpenGLRenderer2D] DeleteGLTexture id=3
+    [NkOpenGLRenderer2D] Shutdown
+    [NkOpenGL] Shutdown OK
+
+    ◀  FIN D'EXECUTION — termine normalement  (545.63s)
+
+Duree de la session : 545.63 secondes, soit environ 9 minutes et 6
+secondes. C'est la duree totale de la fenetre NkRef ouverte, pas le
+temps passe a dessiner.
+
+Contexte OpenGL, extrait du terminal :
+
+    [NkOpenGL] Using legacy GLX context path (WSL)
+    [NkOpenGL] GLX OK (GL 4.6)
+    [NkOpenGL] GL 4.6 demande, 4.5 obtenu - on continue
+    [NkOpenGL] Ready - llvmpipe (LLVM 15.0.7, 256 bits) |
+      4.5 (Compatibility Profile) Mesa 23.2.1-1ubuntu3.1~22.04.3 | Mesa
+
+Ces lignes viennent de la sortie du terminal au lancement. Elles
+montrent que la session a bien eu lieu, que la police a ete chargee
+et que l'application s'est terminee normalement.
+
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
