@@ -1,7 +1,10 @@
 Exercice 1 - La carte avant la marche
 
-J'ai lance la commande jenga info dans le dossier Nkentseu.
-Voici la sortie brute complete, de la premiere a la derniere ligne.
+J'ai lance la commande :
+
+    jenga info
+
+Sortie brute complete, de la premiere a la derniere ligne :
 
 ```
 
@@ -347,14 +350,22 @@ Status: Not running
 
 ```
 
-Analyse
+Comptage des projets par type
 
-Nombre de projets par type :
-- StaticLib : 91
-- TestSuite : 71
-- ConsoleApp : 85
-- WindowedApp : 65
-Total : 312 projets, ce qui correspond a la somme des quatre nombres.
+Commande :
+
+    awk "NF>=5 && (\$2==\"StaticLib\" || \$2==\"TestSuite\" || \$2==\"ConsoleApp\" || \$2==\"WindowedApp\") {print \$2}" /tmp/info.txt | sort | uniq -c
+
+Sortie brute :
+
+```
+    113 ConsoleApp
+     60 StaticLib
+     68 TestSuite
+     55 WindowedApp
+```
+
+Total : 113 + 60 + 68 + 55 = 296 projets.
 
 Nombre de chaines de compilation : 3, nommees host-clang, host-gcc
 et clang-mingw, visibles dans la section Available Toolchains.
@@ -364,15 +375,19 @@ Projet de demarrage : Sandbox, indique par la ligne Start project.
 Fichier racine du workspace : Nkentseu.jenga, indique par la ligne
 Entry file.
 
-Reponse a la question sur le projet de demarrage
+Datation de la mesure
 
-Le projet de demarrage est celui qui est lance quand on tape jenga
-run sans preciser --project. Si on ne le precise pas et qu'on ne
-donne pas non plus --project sur la ligne de commande, Jenga ne
-sait pas quel binaire executer et refuse de continuer. C'est ce
-que montre la sortie : Start project: Sandbox est la valeur par
-defaut choisie par le workspace.
+Commande :
+
+```
+git log -1 --format="%h %ad" --date=short
+```
+
+Sortie brute :
+
+```
+9c3fad3 2026-09-13
+```
 
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
-Dernier commit du depot Nkentseu : 9c3fad3, date du 2026-09-13.
