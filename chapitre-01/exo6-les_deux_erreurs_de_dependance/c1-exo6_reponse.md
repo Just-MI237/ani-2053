@@ -1,149 +1,133 @@
 Exercice 6 - Les deux erreurs de dependance
 
-Pour cet exercice, j'ai modifie le projet MonEssai pour qu'il appelle
-reellement une fonction de NKPlatform. J'ai choisi GetPlatformConfig,
-declaree dans NkPlatformConfig.h et definie dans NkPlatformConfig.cpp.
-Comme le code est dans un fichier .cpp, un vrai lien avec la
-bibliotheque NKPlatform est necessaire.
+J'ai teste quatre etats du projet MonEssai. Dans chaque etat, main.cpp
+appelle nkentseu::platform::GetPlatformConfig(), une fonction definie
+dans NkPlatformConfig.cpp. Sans cette fonction, le lien echoue.
 
-Le fichier main.cpp contient :
+Datation de la mesure
 
-#include "NKPlatform/NkPlatformConfig.h"
+Commande :
 
-int main()
-{
-    const auto& config = nkentseu::platform::GetPlatformConfig();
-    (void)config;
-    return 0;
-}
+```
+git log -1 --format="%h %ad" --date=short
+```
 
-J'ai teste trois configurations l'une apres l'autre. Entre chaque test,
-j'ai supprime le dossier Build pour qu'un ancien fichier .a ne fausse
-pas le resultat.
+Sortie brute :
 
-Cas 0 : dependson et links presents
+```
+9c3fad3 2026-09-13
+```
 
-MonEssai.jenga contenait :
+Version de Jenga : 2.8.0. C'est important pour la conclusion, parce
+que le comportement de dependson a change selon les versions.
 
-    includedirs(["%{wks.location}/Kernel/Foundation/NKPlatform/src"])
-    dependson(["NKPlatform"])
-    links(["NKPlatform"])
+Cas 0 - dependson et links presents
 
-La commande jenga build --project MonEssai --config Debug a produit :
+Commande :
 
+```
+rm -rf Build/
+jenga build --project MonEssai --config Debug
+```
+
+Sortie brute :
+
+```
 Build Order (2 projects):
   1. NKPlatform [STATIC_LIB]
   2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
-
-NKPlatform a ete compile et lie en premier, puis MonEssai a ete compile
-et lie. Resultat :
-
-BUILD COMPLETED
 Projects Built:  2/2
-Status: SUCCESS
+Status:         SUCCESS
+```
 
-Cas 1 : links seul, sans dependson
+Cas 1 - links seul, sans dependson
 
-J'ai retire dependson et garde links. MonEssai.jenga contenait :
+Commande :
 
-    includedirs(["%{wks.location}/Kernel/Foundation/NKPlatform/src"])
-    links(["NKPlatform"])
+```
+rm -rf Build/
+jenga build --project MonEssai --config Debug
+```
 
-La commande a produit :
+Sortie brute :
 
+```
 Build Order (1 projects):
   1. MonEssai [CONSOLE_APP]
-
-Project: MonEssai  Kind: CONSOLE_APP
-Found 1 source file(s)
-Compiled: main.cpp
-Linking...
-Compilation Error: Link Failed
 /usr/bin/ld: cannot find -lNKPlatform: No such file or directory
 clang: error: linker command failed with exit code 1
+Status:         FAILURE
+```
 
-BUILD FAILED
-Projects Built:  0/1
-Status: FAILURE
+Cas 2 - dependson seul, sans links
 
-Le message est :
+Commande :
 
-  /usr/bin/ld: cannot find -lNKPlatform: No such file or directory
+```
+rm -rf Build/
+jenga build --project MonEssai --config Debug
+```
 
-Jenga n'a construit que MonEssai. NKPlatform n'a pas ete construit,
-donc le fichier Build/Lib/Debug-Linux/NKPlatform.a n'existe pas. La
-compilation de main.cpp a elle-meme reussi ; c'est le lien qui echoue,
-parce que le compilateur cherche une bibliotheque nommee NKPlatform et
-ne la trouve pas.
+Sortie brute :
 
-Cas 2 : dependson seul, sans links
-
-J'ai remis dependson et retire links. MonEssai.jenga contenait :
-
-    includedirs(["%{wks.location}/Kernel/Foundation/NKPlatform/src"])
-    dependson(["NKPlatform"])
-
-La commande a produit :
-
+```
 Build Order (2 projects):
   1. NKPlatform [STATIC_LIB]
   2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
-
-NKPlatform a ete compile et lie en premier. Puis MonEssai a ete compile
-et lie avec succes :
-
-BUILD COMPLETED
 Projects Built:  2/2
-Status: SUCCESS
+Status:         SUCCESS
+```
 
-Contrairement a ce qu'on pourrait attendre, ce cas reussit. J'ai pris
-soin de prendre la fonction GetPlatformConfig dont le code est dans un
-.cpp, donc un vrai symbole externe. Et pourtant le lien se fait sans
-erreur undefined reference. Cela veut dire que dans Jenga 2.8.0, pour un
-projet du workspace, dependson implique aussi le lien vers ce projet.
-Ce n'est pas une erreur, c'est une decision de conception de Jenga.
+Cas 3 - ni dependson ni links
 
-Ce qui distingue les deux cas
+Commande :
 
-dependson repond a la question : dans quel ordre construire. Il dit
-que NKPlatform doit etre construit avant MonEssai.
+```
+rm -rf Build/
+jenga build --project MonEssai --config Debug
+```
 
-links repond a la question : avec quoi lier. Il dit d'ajouter
-NKPlatform.a au moment de l'edition de liens.
+Sortie brute :
 
-Quand on les confond, on obtient deux situations differentes :
+```
+Build Order (1 projects):
+  1. MonEssai [CONSOLE_APP]
+/usr/bin/ld: MonEssai/src_main.o: in function main:
+main.cpp:(.text+0x10): undefined reference to
+  nkentseu::platform::GetPlatformConfig()
+clang: error: linker command failed with exit code 1
+Status:         FAILURE
+```
 
-Sans dependson, la bibliotheque n'est pas construite au moment du lien.
-L'editeur de liens echoue parce qu'il ne trouve pas le fichier a lire.
-C'est le message du Cas 1 : cannot find -lNKPlatform: No such file or
-directory.
+Table de diagnostic
 
-Sans links, la bibliotheque est bien construite grace a dependson, et
-Jenga ajoute le lien automatiquement dans cette version. Il n'y a donc
-pas d'erreur.
+- dependson + links    -> build reussi
+- links seul           -> cannot find -lNKPlatform
+- dependson seul       -> build reussi (Jenga 2.8.0)
+- ni l'un ni l'autre   -> undefined reference a GetPlatformConfig
 
-Ce qui reste vrai dans tous les cas
+Ce que les deux messages disent
 
-La distinction entre dependson et links est importante. Pour une
-bibliotheque systeme, comme pthread, links est obligatoire : elle
-existe deja sur la machine, mais il faut la declarer pour que le
-compilateur l'ajoute a la ligne de lien. Pour une bibliotheque du
-workspace, dans cette version de Jenga, dependson seul suffit.
+cannot find -lNKPlatform veut dire que la bibliotheque n'a pas ete
+construite avant. dependson manque. La contrainte d'ordre n'existe
+pas, donc Jenga n'a pas construit NKPlatform avant MonEssai. Au
+moment de lier, le fichier .a n'existe pas.
 
-Une remarque sur la version de Jenga
+undefined reference a GetPlatformConfig veut dire que la bibliotheque
+n'est pas dans la ligne de lien. Ni dependson ni links ne sont
+declares, donc Jenga ne sait pas qu'il doit chercher le symbole dans
+NKPlatform. Le fichier .a a ete construit par chance (un build
+precedent), mais il n'est pas utilise.
 
-Dans le principe, dependson et links sont deux mecanismes distincts.
-Dans Jenga 2.8.0 tel qu'il est installe ici, le comportement se
-superpose pour les projets du workspace. Ce detail est utile a
-connaitre : sur une autre version, on pourrait observer une erreur
-undefined reference a la place du succes du Cas 2.
+Et le cas 2 ?
 
-Etat du projet a la fin
-
-J'ai laisse MonEssai dans l'etat du Cas 0, avec dependson et links
-tous les deux, pour que le projet compile normalement si on le
-relance.
+Avec dependson seul, le build reussit. La bibliotheque est construite
+avant, et Jenga ajoute aussi le drapeau de lien vers le projet du
+workspace. C'est une decision de conception, et elle n'est pas la
+meme dans toutes les versions de Jenga. Dans la version 2.8.0
+utilisee ici, dependson implique le lien. C'est pour ca que le cas 2
+reussit. Dans une version plus ancienne, ce cas aurait echoue avec
+undefined reference.
 
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
-Dernier commit du depot : 9c3fad3, date du 2026-09-13.
