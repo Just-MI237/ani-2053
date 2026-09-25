@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-MonEssai.jenga — cas 2 : avec dependson, sans links.
+MonEssai.jenga — projet console minimal pour l'exercice 5.
+Un main qui ne fait rien, sans dependances.
 """
 
 from Jenga import *
@@ -14,8 +15,10 @@ with project("MonEssai"):
     cppdialect("C++17")
     location(".")
     files(["src/**.cpp"])
-    includedirs(["%{wks.location}/Kernel/Foundation/NKPlatform/src"])
-    dependson(["NKPlatform"])
+    nkentseudependson(
+        [],
+        extra_includes=["src"],
+    )
     objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
     targetdir("%{wks.location}/Build/Bin/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
     with filter("system:Windows"):
