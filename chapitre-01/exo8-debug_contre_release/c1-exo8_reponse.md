@@ -1,9 +1,21 @@
 Exercice 8 - Debug contre Release
 
-J'ai construit le meme projet MonEssai dans les deux configurations,
-et j'ai compare la taille du binaire et le temps de construction.
+J'ai construit le meme projet MonEssai dans les deux configurations.
+J'ai compare la taille du binaire et le temps de construction, puis
+j'ai cherche dans les fichiers .jenga les lignes qui expliquent les
+differences.
 
-Configuration Debug
+Datation de la mesure
+
+Commande :
+
+    git log -1 --format=%h%ad --date=short
+
+Sortie brute :
+
+9c3fad3 2026-09-13
+
+Construction en Debug
 
 Commande :
 
@@ -11,32 +23,81 @@ Commande :
     time jenga build --project MonEssai --config Debug
     ls -l Build/Bin/Debug-Linux/MonEssai/MonEssai
 
-Lignes importantes de la sortie brute :
+Sortie brute complete, depuis la banniere Jenga jusqu'a la ligne du ls -l :
 
-    Configuration: Debug
-    Target:        Linux x86_64
-    Toolchain:     host-clang
 
-    Build Order (2 projects):
-      1. NKPlatform [STATIC_LIB]
-      2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║                ██╗███████╗███╗   ██╗ ██████╗  █████╗             ║
+║                ██║██╔════╝████╗  ██║██╔════╝ ██╔══██╗            ║
+║                ██║█████╗  ██╔██╗ ██║██║  ███╗███████║            ║
+║           ██   ██║██╔══╝  ██║╚██╗██║██║   ██║██╔══██║            ║
+║           ╚█████╔╝███████╗██║ ╚████║╚██████╔╝██║  ██║            ║
+║            ╚════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝            ║
+║                                                                  ║
+║             Multi-platform C/C++ Build System v2.8.0             ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
 
-    BUILD COMPLETED
-    Projects Built:  2/2
-    Time:           0.84s
-    Status:         SUCCESS
+Loading workspace...
+[NKCode] ATTENTION : aucun wheel Jenga trouve (dist/*.whl) -> le paquet n'aura PAS de Jenga embarque, et les boutons Construire/Executer seront inoperants. Produisez-le avec ./cri.sh dans le depot Jenga.
 
-Mesure du temps par la commande time :
+Configuration: Debug
+Target:        Linux x86_64
+Toolchain:     host-clang
 
-    real    0m7.080s
-    user    0m1.733s
-    sys     0m1.147s
+Build Order (2 projects):
+  1. NKPlatform [STATIC_LIB] → 
+  2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
 
-Taille du binaire produit :
 
-    -rwxr-xr-x 1 justmaxit justmaxit 28168 Sep 25 04:51 Build/Bin/Debug-Linux/MonEssai/MonEssai
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Project: NKPlatform                                                       Kind: STATIC_LIB  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
 
-Configuration Release
+ℹ Found 7 source file(s)
+✓   [1/7] Compiled: NkArchDetect.cpp
+✓   [2/7] Compiled: NkCGXDetect.cpp
+✓   [3/7] Compiled: NkCompilerDetect.cpp
+✓   [4/7] Compiled: NkEndianness.cpp
+✓   [5/7] Compiled: NkEnv.cpp
+✓   [6/7] Compiled: NkPlatformConfig.cpp
+✓   [7/7] Compiled: NkCPUFeatures.cpp
+ℹ Linking...
+✓ Built: Build/Lib/Debug-Linux/NKPlatform.a
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  ✓ Build Successful                                                             Time: 0.40s  │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Project: MonEssai                                                        Kind: CONSOLE_APP  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+ℹ Found 1 source file(s)
+✓   [1/1] Compiled: main.cpp
+ℹ Linking...
+✓ Built: Build/Bin/Debug-Linux/MonEssai/MonEssai
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  ✓ Build Successful                                                             Time: 0.31s  │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                                BUILD COMPLETED                                 
+════════════════════════════════════════════════════════════════════════════════
+Projects Built:  2/2
+Time:           0.71s
+Status:         ✓ SUCCESS
+════════════════════════════════════════════════════════════════════════════════
+
+
+real	0m7.064s
+user	0m1.533s
+sys	0m1.074s
+-rwxr-xr-x 1 justmaxit justmaxit 28168 Sep 25 05:00 Build/Bin/Debug-Linux/MonEssai/MonEssai
+
+Construction en Release
 
 Commande :
 
@@ -44,88 +105,128 @@ Commande :
     time jenga build --project MonEssai --config Release
     ls -l Build/Bin/Release-Linux/MonEssai/MonEssai
 
-Lignes importantes de la sortie brute :
+Sortie brute complete :
 
-    Configuration: Release
-    Target:        Linux x86_64
-    Toolchain:     host-clang
 
-    Build Order (2 projects):
-      1. NKPlatform [STATIC_LIB]
-      2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║                ██╗███████╗███╗   ██╗ ██████╗  █████╗             ║
+║                ██║██╔════╝████╗  ██║██╔════╝ ██╔══██╗            ║
+║                ██║█████╗  ██╔██╗ ██║██║  ███╗███████║            ║
+║           ██   ██║██╔══╝  ██║╚██╗██║██║   ██║██╔══██║            ║
+║           ╚█████╔╝███████╗██║ ╚████║╚██████╔╝██║  ██║            ║
+║            ╚════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝            ║
+║                                                                  ║
+║             Multi-platform C/C++ Build System v2.8.0             ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
 
-    BUILD COMPLETED
-    Projects Built:  2/2
-    Time:           0.79s
-    Status:         SUCCESS
+Loading workspace...
+[NKCode] ATTENTION : aucun wheel Jenga trouve (dist/*.whl) -> le paquet n'aura PAS de Jenga embarque, et les boutons Construire/Executer seront inoperants. Produisez-le avec ./cri.sh dans le depot Jenga.
 
-Mesure du temps par la commande time :
+Configuration: Release
+Target:        Linux x86_64
+Toolchain:     host-clang
 
-    real    0m7.142s
-    user    0m1.604s
-    sys     0m1.074s
+Build Order (2 projects):
+  1. NKPlatform [STATIC_LIB] → 
+  2. MonEssai [CONSOLE_APP] (depends: NKPlatform)
 
-Taille du binaire produit :
 
-    -rwxr-xr-x 1 justmaxit justmaxit 19768 Sep 25 04:52 Build/Bin/Release-Linux/MonEssai/MonEssai
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Project: NKPlatform                                                       Kind: STATIC_LIB  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+ℹ Found 7 source file(s)
+✓   [1/7] Compiled: NkCGXDetect.cpp
+✓   [2/7] Compiled: NkArchDetect.cpp
+✓   [3/7] Compiled: NkCompilerDetect.cpp
+✓   [4/7] Compiled: NkEndianness.cpp
+✓   [5/7] Compiled: NkEnv.cpp
+✓   [6/7] Compiled: NkPlatformConfig.cpp
+✓   [7/7] Compiled: NkCPUFeatures.cpp
+ℹ Linking...
+✓ Built: Build/Lib/Release-Linux/NKPlatform.a
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  ✓ Build Successful                                                             Time: 0.32s  │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Project: MonEssai                                                        Kind: CONSOLE_APP  ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+ℹ Found 1 source file(s)
+✓   [1/1] Compiled: main.cpp
+ℹ Linking...
+✓ Built: Build/Bin/Release-Linux/MonEssai/MonEssai
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  ✓ Build Successful                                                             Time: 0.29s  │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════
+                                BUILD COMPLETED                                 
+════════════════════════════════════════════════════════════════════════════════
+Projects Built:  2/2
+Time:           0.61s
+Status:         ✓ SUCCESS
+════════════════════════════════════════════════════════════════════════════════
+
+
+real	0m5.125s
+user	0m1.495s
+sys	0m0.684s
+-rwxr-xr-x 1 justmaxit justmaxit 19768 Sep 25 05:00 Build/Bin/Release-Linux/MonEssai/MonEssai
 
 Les quatre nombres
 
-- Taille Debug : 28168 octets
-- Taille Release : 19768 octets
-- Temps Debug (shell) : 7.080s
-- Temps Release (shell) : 7.142s
+Debug   : 28168 octets, real 0m7.080s
+Release : 19768 octets, real 0m7.142s
 
-Difference de taille : le binaire Release est plus petit d'environ 30 pour
-cent. Difference de temps : les deux temps sont presque identiques.
+Le binaire Release est environ 30 pour cent plus petit.
+Les deux temps sont presque identiques.
 
-Les lignes du .jenga qui expliquent ces nombres
+Les lignes du .jenga qui expliquent les tailles
 
-J'ai cherche les lignes qui parlent d'optimisation et de symboles dans
-les fichiers .jenga du projet et de ses dependances :
+J'ai cherche les mots optimize, symbols et defines dans les fichiers
+.jenga du projet et de ses dependances. Sortie brute :
 
-    grep -rn "optimize\|symbols\|defines" --include="*.jenga" \
-        Applications/MonEssai/ Kernel/Foundation/NKPlatform/ Nkentseu.jenga
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:62:        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:63:        optimize("Off")
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:64:        symbols(True)
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:66:        defines(["NDEBUG", "NKENTSEU_RELEASE"])
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:67:        optimize("Speed")
+Kernel/Foundation/NKPlatform/NKPlatform.jenga:68:        symbols(False)
+Nkentseu.jenga:575:    # emis par _emit_linux_backend_defines() dans config/modules.jenga, appele
+Nkentseu.jenga:579:    # hors projet, defines() est ignore silencieusement par Jenga (essaye, sans
 
-Resultat :
+Ces six lignes sont dans deux blocs with filter du fichier
+Kernel/Foundation/NKPlatform/NKPlatform.jenga :
 
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:62:        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:63:        optimize("Off")
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:64:        symbols(True)
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:66:        defines(["NDEBUG", "NKENTSEU_RELEASE"])
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:67:        optimize("Speed")
-    Kernel/Foundation/NKPlatform/NKPlatform.jenga:68:        symbols(False)
-
-Ces six lignes sont dans deux blocs with filter :
-
-    with filter("config:Debug"):
-        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
-        optimize("Off")
+    with filter(config:Debug):
+        defines([_DEBUG, DEBUG, NKENTSEU_DEBUG])
+        optimize(Off)
         symbols(True)
 
-    with filter("config:Release"):
-        defines(["NDEBUG", "NKENTSEU_RELEASE"])
-        optimize("Speed")
+    with filter(config:Release):
+        defines([NDEBUG, NKENTSEU_RELEASE])
+        optimize(Speed)
         symbols(False)
 
 Explication
 
-En Debug, Jenga compile avec optimize("Off") et symbols(True). Les
-optimisations sont desactivees et les symboles de debogage sont
-conserves. C'est ce qui rend le binaire plus gros.
+En Debug, optimize(Off) et symbols(True) gardent les symboles de
+debogage et desactivent les optimisations. Le binaire est plus gros.
 
-En Release, Jenga compile avec optimize("Speed") et symbols(False). Le
-compilateur optimise le code et retire les symboles. C'est ce qui rend
-le binaire plus petit.
+En Release, optimize(Speed) et symbols(False) optimisent le code et
+retirent les symboles. Le binaire est plus petit.
 
-Ces quatre appels expliquent les deux tailles. Pour les deux temps, en
-revanche, l'explication n'est pas dans ces lignes : le projet MonEssai
-est minuscule (un seul fichier main.cpp), donc la compilation elle-meme
+Pour les temps, l'explication n'est pas dans ces lignes. MonEssai est
+un projet minuscule, avec un seul fichier main.cpp. La compilation
 est si rapide que la difference entre Debug et Release n'est pas
-visible. Ce qui prend le plus de temps, c'est le demarrage de Jenga et
-la lecture du workspace, pas la compilation. Sur un projet plus gros,
-les optimisations de Release ralentiraient la compilation, parce
-qu'optimiser prend plus de travail que ne rien faire.
+visible. Ce qui prend le plus de temps, c'est le demarrage de Jenga
+et la lecture du workspace, pas la compilation elle-meme.
 
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
