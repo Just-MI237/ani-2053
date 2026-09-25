@@ -76,6 +76,32 @@ Pour les fichiers .jenga, j'en trouve 219 contre 221 dans le livre. Le
 leger ecart vient probablement de la meme raison : le depot a evolue
 entre l'ecriture du chapitre et ma mesure.
 
+
+Preuve de l'ecart avec le chapitre
+
+Le chapitre annonce 2641 fichiers .cpp/.h. Pour verifier que l'ecart
+vient bien de l'evolution du depot et non d'une erreur de comptage, j'ai
+regarde l'etat du depot a plusieurs dates.
+
+Commandes :
+
+    git log --format="%h %ad" --date=short --since="2026-08-28" --until="2026-09-13"
+    git ls-tree -r <commit> --name-only | grep -E '\.(cpp|h)$' | grep -v '^Externals/' | grep -v '^Build/' | wc -l
+
+Trois commits ont ete mesures :
+
+    0d50a971 2026-08-28 2587 fichiers .cpp/.h
+    c1c815ff 2026-09-10 2657 fichiers .cpp/.h
+    9c3fad3  2026-09-13 2755 fichiers .cpp/.h
+
+Le chiffre du chapitre, 2641, est encadre : il est plus grand que 2587
+(28 aout) et plus petit que 2657 (10 septembre). Le chapitre a donc ete
+ecrit entre le 28 aout et le 10 septembre 2026.
+
+Le commit exact du chapitre n'est pas dans mon historique local, mais
+l'encadrement suffit a montrer que le depot a evolue entre l'ecriture
+du chapitre et ma mesure.
+
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
 Dernier commit du depot : 9c3fad3, date du 2026-09-13.
