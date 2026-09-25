@@ -86,86 +86,95 @@ Sortie brute :
 
 Annotations
 
-Chaque annotation porte une marque. [teste] veut dire que j'ai
-retire la ligne, reconstruit, note le message, puis remis la ligne.
-[deduit] veut dire que je n'ai pas teste cette annotation, c'est
-une deduction raisonnable.
+Chaque annotation porte deux choses. [?] veut dire que je ne comprends
+pas encore cette ligne, et j'attends une explication. [teste] veut dire
+que j'ai retire la ligne, reconstruit, note le message, puis remis la
+ligne. Une annotation sans marque est une deduction raisonnable.
 
 ```
-Ligne 1  | #!/usr/bin/env python3
-              [deduit] Shebang. Execute ce fichier avec Python 3.
+              Shebang. Execute ce fichier avec Python 3.
 
 Ligne 2  | # -*- coding: utf-8 -*-
-              [deduit] Encodage UTF-8 declare.
+              Encodage UTF-8 declare.
 
 Lignes 3 a 8 | Docstring du module
-              [deduit] Decrit NKPlatform : detection OS, architecture,
-                       compilateur, CPU. Module de fondation sans
-                       dependances.
+              Decrit NKPlatform : detection OS, architecture,
+              compilateur, CPU.
 
 Ligne 10 | from Jenga import *
 Ligne 11 | from jengaconfig import *
-              [deduit] Importe toutes les fonctions de Jenga et de
-                       jengaconfig.
+              Importe toutes les fonctions de Jenga et de jengaconfig.
 
-Ligne 14 | with project(NKPlatform):
-              [deduit] Declare le projet NKPlatform.
+Ligne 14 | with project("NKPlatform"):
+              Declare le projet NKPlatform.
 
-Ligne 15 |     language(C++)
-              [deduit] Langage du projet.
+Ligne 15 |     language("C++")
+              Langage du projet.
 
-Ligne 16 |     cppdialect(C++20)
-              [deduit] Norme C++20.
+Ligne 16 |     cppdialect("C++20")
+              Norme C++20.
+              [?] Pourquoi C++20 ici alors que d'autres projets sont
+                  en C++17. Le choix est-il impose par le module ou
+                  par le projet qui l'utilise ?
 
-Ligne 17 |     location(.)
-              [deduit] Le projet vit dans le dossier du fichier .jenga.
+Ligne 17 |     location(".")
+              Le projet vit dans le dossier du fichier .jenga.
 
-Lignes 19 a 23 | nkentseudependson([], selfexport=, extra_includes=)
-              [teste] En retirant cette instruction et ses arguments,
-                      on obtient :
+Lignes 19 a 23 | nkentseudependson([], selfexport=..., extra_includes=...)
+              [teste] En retirant le bloc entier (les 5 lignes), le
+                      build echoue avec 14 erreurs de compilation
+                      reparties sur 7 fichiers. Sans les includedirs
+                      que cette fonction ajoute, les fichiers .cpp ne
+                      trouvent plus leurs propres en-tetes.
 
-                      Error loading workspace: unmatched ')'
-                      (NKPlatform.jenga, line 23)
-                      Failed to load workspace.
-
-                      Le workspace ne charge meme pas. La parenthese
-                      fermante reste seule et Python refuse de lire
-                      le fichier.
-
-Ligne 25 |     pchheader(pch/pch.h)
-Ligne 26 |     pchsource(pch/pch.cpp)
-              [teste] En retirant ces deux lignes, le build reussit
-                      en 0.37s sans message d'erreur. Seul effet :
-                      les en-tetes sont inclus a chaque fichier au
-                      lieu d'etre precompiles.
+Ligne 25 |     pchheader("pch/pch.h")
+Ligne 26 |     pchsource("pch/pch.cpp")
+              [teste] En retirant ces deux lignes, le build reussit en
+                      0.37s sans message d'erreur. Les en-tetes sont
+                      alors inclus a chaque fichier au lieu d'etre
+                      precompiles.
+              [?] Quelle est la difference de vitesse sur un module
+                  plus gros que NKPlatform ?
 
 Lignes 28 a 31 | files([...])
-              [deduit] Liste des fichiers source. Le motif **.cpp
-                       descend dans les sous-dossiers.
+              Liste des fichiers source. Le motif **.cpp descend dans
+              les sous-dossiers.
 
 Ligne 33 |     objdir(...)
-              [deduit] Ou vont les fichiers intermediaires.
+              Ou vont les fichiers intermediaires.
 
 Ligne 34 |     targetdir(...)
               [teste] En retirant cette ligne, le build reussit en
-                      0.43s. Le binaire va dans un sous-dossier au
-                      nom du projet :
-                        Build/Lib/Debug-Linux/NKPlatform/NKPlatform.a
-                      au lieu de :
-                        Build/Lib/Debug-Linux/NKPlatform.a
+                      0.43s. Le binaire va dans un sous-dossier au nom
+                      du projet : Build/Lib/Debug-Linux/NKPlatform/NKPlatform.a
+                      au lieu de Build/Lib/Debug-Linux/NKPlatform.a.
+                      Mesure faite avec Jenga 2.8.0.
+              [?] Ce chemin depend-il de la version de Jenga ?
 
-Lignes 36 a 54 | Filtres par systeme (Windows, UWP, macOS, Android,
-                HarmonyOS, Web, Xbox)
-              [deduit] Choisit la chaine de compilation et les options
-                       selon la plateforme cible.
+Lignes 36 a 59 | Filtres par systeme (Windows, UWP, macOS, Android,
+                HarmonyOS, Web, XboxSeries, XboxOne)
+              Choisit la chaine de compilation et les options selon
+              la plateforme cible.
+              [?] Pourquoi la meme chaine xbox-clang sert-elle pour
+                  UWP et pour Xbox ?
+              [?] Pourquoi le PCH est-il desactive sur Android et
+                  HarmonyOS ?
 
-Lignes 56 a 68 | Filtres par configuration (Debug, Release)
-              [deduit] En Debug, optimisations desactivees et
-                       symboles gardes. En Release, optimisations
-                       activees et symboles retires.
+Lignes 61 a 69 | Filtres par configuration (Debug, Release)
+              En Debug, optimisations desactivees et symboles gardes.
+              En Release, optimisations activees et symboles retires.
+              [?] Comment sont generes les noms NKENTSEU_DEBUG et
+                  NKENTSEU_RELEASE ? Ils ne sont pas standards.
 
-Lignes 71 a 73 | with test(): testfiles([...])
-              [deduit] Declare une suite de tests unitaires.
+Ligne 71 | with filter(...)
+              Filtre qui restreint le bloc de test aux plateformes
+              de bureau et au Web. Les lignes 72 et 73 ne
+              s'appliquent que si ce filtre est vrai.
+
+Lignes 72 a 73 | with test(): testfiles([...])
+              Declare une suite de tests unitaires et liste ses
+              fichiers.
+
 ```
 
 Datation de la mesure
