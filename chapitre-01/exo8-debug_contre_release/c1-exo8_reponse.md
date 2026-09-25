@@ -7,22 +7,29 @@ Datation de la mesure
 
 Commande :
 
-    git log -1 --format=%h%ad --date=short
+```
+git log -1 --format="%h %ad" --date=short
+```
 
 Sortie brute :
 
+```
 9c3fad3 2026-09-13
+```
 
 Configuration Debug
 
 Commande :
 
-    rm -rf Build/
-    jenga build --project MonEssai --config Debug
-    ls -l Build/Bin/Debug-Linux/MonEssai/MonEssai
+```
+rm -rf Build/
+jenga build --project MonEssai --config Debug
+ls -l Build/Bin/Debug-Linux/MonEssai/MonEssai
+```
 
 Sortie brute complete, depuis la banniere Jenga jusqu'a la ligne du ls -l :
 
+```
 
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
@@ -90,17 +97,21 @@ Status:         ✓ SUCCESS
 ════════════════════════════════════════════════════════════════════════════════
 
 -rwxr-xr-x 1 justmaxit justmaxit 28168 Sep 25 05:09 Build/Bin/Debug-Linux/MonEssai/MonEssai
+```
 
 Configuration Release
 
 Commande :
 
-    rm -rf Build/
-    jenga build --project MonEssai --config Release
-    ls -l Build/Bin/Release-Linux/MonEssai/MonEssai
+```
+rm -rf Build/
+jenga build --project MonEssai --config Release
+ls -l Build/Bin/Release-Linux/MonEssai/MonEssai
+```
 
 Sortie brute complete :
 
+```
 
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
@@ -168,6 +179,7 @@ Status:         ✓ SUCCESS
 ════════════════════════════════════════════════════════════════════════════════
 
 -rwxr-xr-x 1 justmaxit justmaxit 19768 Sep 25 05:10 Build/Bin/Release-Linux/MonEssai/MonEssai
+```
 
 Les quatre nombres
 
@@ -181,10 +193,13 @@ Les lignes du .jenga qui expliquent les tailles
 
 Commande :
 
-    grep -rn optimize symbols defines --include=*.jenga Applications/MonEssai/ Kernel/Foundation/NKPlatform/ Nkentseu.jenga
+```
+grep -rn "optimize\|symbols\|defines" --include="*.jenga" Applications/MonEssai/ Kernel/Foundation/NKPlatform/ Nkentseu.jenga
+```
 
 Sortie brute :
 
+```
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:62:        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:63:        optimize("Off")
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:64:        symbols(True)
@@ -193,19 +208,22 @@ Kernel/Foundation/NKPlatform/NKPlatform.jenga:67:        optimize("Speed")
 Kernel/Foundation/NKPlatform/NKPlatform.jenga:68:        symbols(False)
 Nkentseu.jenga:575:    # emis par _emit_linux_backend_defines() dans config/modules.jenga, appele
 Nkentseu.jenga:579:    # hors projet, defines() est ignore silencieusement par Jenga (essaye, sans
+```
 
 Ces six lignes sont dans deux blocs with filter du fichier
 Kernel/Foundation/NKPlatform/NKPlatform.jenga :
 
-    with filter(config:Debug):
-        defines([_DEBUG, DEBUG, NKENTSEU_DEBUG])
-        optimize(Off)
-        symbols(True)
+```
+with filter("config:Debug"):
+    defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
+    optimize("Off")
+    symbols(True)
 
-    with filter(config:Release):
-        defines([NDEBUG, NKENTSEU_RELEASE])
-        optimize(Speed)
-        symbols(False)
+with filter("config:Release"):
+    defines(["NDEBUG", "NKENTSEU_RELEASE"])
+    optimize("Speed")
+    symbols(False)
+```
 
 Explication
 
