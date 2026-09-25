@@ -1,170 +1,180 @@
 Exercice 4 - Le fichier de projet annoté
 
-J'ai choisi le module NKPlatform. C'est le module le plus bas du moteur, il
-ne dépend d'aucun autre module, et il est le premier construit dans l'ordre
-que Jenga affiche. Son fichier se trouve à :
+J'ai choisi le module NKPlatform. C'est le module le plus bas du moteur,
+il ne dépend d'aucun autre module, et il est le premier construit dans
+l'ordre que Jenga affiche.
 
-Kernel/Foundation/NKPlatform/NKPlatform.jenga
+Le fichier se trouve à :
 
-Je l'annote ci-dessous en suivant les cinq points demandés par l'énoncé :
-type, sources, dépendances, filtres, tests. Je marque d'un point
-d'interrogation ce que je ne comprends pas encore.
+    Kernel/Foundation/NKPlatform/NKPlatform.jenga
 
-En-tête du fichier
+Il est déposé tel quel à côté de ce rapport, sous le nom NKPlatform.jenga.
 
-Le fichier s'ouvre sur deux lignes techniques. La première est un shebang
-qui dit au système que ce fichier est un script Python. C'est normal,
-puisqu'un fichier .jenga est un programme Python. La deuxième précise que
-l'encodage du fichier est UTF-8, pour que les accents dans les commentaires
-soient bien lus.
+Ci-dessous, je reprends le fichier ligne par ligne et j'ajoute mon
+commentaire sous chaque ligne qui en mérite un. Les commentaires du
+fichier d'origine sont en `#`. Mes propres annotations commencent par
+un chevron ↑ pour qu'on voie tout de suite ce qui est de moi et ce qui
+est du fichier.
 
-Vient ensuite un bloc entre triples guillemets. C'est une description du
-module : NKPlatform détecte le système d'exploitation, l'architecture, le
-compilateur et le processeur. C'est un module de fondation, sans
-dépendances, écrit en C++20.
+---
 
-Les imports
+#!/usr/bin/env python3
+  ↑ Shebang. Dit au système d'exécuter ce fichier avec Python 3. C'est
+    normal, puisqu'un fichier .jenga est un programme Python.
 
-Les deux lignes suivantes chargent les outils nécessaires :
+# -*- coding: utf-8 -*-
+  ↑ Déclare l'encodage UTF-8 du fichier, pour que les accents dans les
+    commentaires soient bien lus.
+
+"""
+NKPlatform — Détection OS/arch/compilateur/CPU (C++20)
+=========================================================
+Fondation sans dépendances. Fournit des macros et informations
+compilées sur l'environnement d'exécution.
+"""
+  ↑ Docstring du module. Décrit ce que fait NKPlatform : il détecte
+    le système d'exploitation, l'architecture processeur, le compilateur
+    et les caractéristiques du CPU. C'est un module de fondation, sans
+    dépendances, en C++20.
 
 from Jenga import *
+  ↑ Importe toutes les fonctions de Jenga (project, files, filter, etc.).
+    L'astérisque veut dire "tout ce que le module expose".
+
 from jengaconfig import *
+  ↑ Importe toutes les fonctions propres au dépôt Nkentseu
+    (nkentseudependson, TC_WINDOWS, etc.).
 
-Le premier import charge les fonctions de Jenga (project, files, filter,
-etc.). Le second charge les fonctions propres au dépôt Nkentseu, comme
-nkentseudependson et la constante TC_WINDOWS.
-
-Type du projet
-
-La ligne principale est :
 
 with project("NKPlatform"):
+  ↑ Déclare un projet nommé NKPlatform. Tout ce qui est indenté en
+    dessous appartient à ce projet. Le with est un gestionnaire de
+    contexte Python : à la fermeture du bloc, la déclaration est finie.
 
-Elle déclare un projet nommé NKPlatform. Tout ce qui est indenté en dessous
-appartient à ce projet.
+    language("C++")
+      ↑ Le projet est écrit en C++.
 
-Deux lignes précisent le contenu et la norme :
+    cppdialect("C++20")
+      ↑ Le projet utilise la norme C++20.
+      ? Je ne sais pas exactement quelle version précise de C++20 est visée.
 
-language("C++")
-cppdialect("C++20")
+    location(".")
+      ↑ Le projet vit dans le dossier où se trouve ce fichier .jenga.
+        Le point veut dire "ici".
 
-Le projet est donc écrit en C++ et utilise la norme C++20. Quelle version
-précise de C++20 est visée ?
+    nkentseudependson(
+        [],
+        selfexport="NKPlatform",
+        extra_includes=["src", "pch"],
+    )
+      ↑ Fonction propre à Nkentseu, pas de Jenga. La liste vide au début
+        dit que NKPlatform ne dépend d'aucun autre module. Cohérent :
+        c'est le socle, construit en premier.
+        selfexport donne le nom de la macro d'export du module.
+        extra_includes ajoute deux dossiers, src et pch, où le compilateur
+        cherchera les en-têtes.
 
-La ligne suivante dit où vit le projet :
+    pchheader("pch/pch.h")
+      ↑ Déclare un en-tête précompilé. PCH veut dire precompiled header.
+        C'est un mécanisme qui prépare certains en-têtes à l'avance pour
+        accélérer la compilation.
 
-location(".")
+    pchsource("pch/pch.cpp")
+      ↑ Le fichier qui sert à construire l'en-tête précompilé.
 
-Le point veut dire : dans le dossier où se trouve ce fichier .jenga.
+    files([
+        "src/NKPlatform/**.cpp",
+        "src/NKPlatform/**.h",
+    ])
+      ↑ Liste des fichiers source. Les motifs veulent dire : tous les
+        .cpp et tous les .h dans src/NKPlatform et ses sous-dossiers.
+        Le double astérisque ** descend dans les sous-dossiers.
 
-Sources
+    objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
+      ↑ Où vont les fichiers intermédiaires pendant la compilation.
+        Les variables entre accolades sont remplacées au moment de la
+        construction : wks.location est le dossier du workspace,
+        cfg.buildcfg vaut Debug ou Release, cfg.system vaut Windows ou
+        Linux, prj.name est le nom du projet courant.
 
-La liste des fichiers source est donnée par :
+    targetdir("%{wks.location}/Build/Lib/%{cfg.buildcfg}-%{cfg.system}")
+      ↑ Où va le fichier final produit, ici une bibliothèque statique.
 
-files([
-    "src/NKPlatform/**.cpp",
-    "src/NKPlatform/**.h",
-])
+    with filter("system:Windows && options:windows-runtime=uwp"):
+        objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}-uwp/%{prj.name}")
+        targetdir("%{wks.location}/Build/Lib/%{cfg.buildcfg}-%{cfg.system}-uwp")
+      ↑ Pour Windows en mode UWP, on change les dossiers de sortie pour
+        ne pas écraser ceux de Windows classique.
 
-Elle veut dire : tous les fichiers .cpp et tous les fichiers .h dans
-src/NKPlatform et tous ses sous-dossiers. Le double astérisque ** descend
-dans les sous-dossiers, contrairement à un seul astérisque qui s'arrête
-au premier niveau.
+    with filter("system:Windows && !options:windows-runtime=uwp && !system:XboxSeries && !system:XboxOne"):
+        usetoolchain(TC_WINDOWS)
+      ↑ Pour Windows classique (pas UWP, pas Xbox), utilise la chaîne de
+        compilation TC_WINDOWS, définie dans jengaconfig.
 
-Le projet déclare aussi un en-tête précompilé :
+    with filter("system:UWP || system:Windows && options:windows-runtime=uwp"):
+        usetoolchain("xbox-clang")
+      ↑ Pour UWP, utilise la chaîne xbox-clang.
+      ? Je ne suis pas sûr de pourquoi la même chaîne sert pour UWP et Xbox.
 
-pchheader("pch/pch.h")
-pchsource("pch/pch.cpp")
+    with filter("system:macOS"):
+        usetoolchain("clang-native")
+      ↑ Pour macOS, utilise clang-native.
 
-PCH veut dire precompiled header. C'est un mécanisme qui prépare certains
-en-têtes à l'avance pour accélérer la compilation. Le .h est l'en-tête
-précompilé, et le .cpp est le fichier qui sert à le construire. Que
-contient exactement le fichier pch.h ?
+    with filter("system:Android"):
+        # Workaround: disable PCH on Android (NDK r27 + clang 18 + libc++)
+        pchheader("")
+        pchsource("")
+        usetoolchain("android-ndk")
+      ↑ Pour Android, on désactive le PCH en mettant des chaînes vides.
+        Le commentaire d'origine dit que c'est un contournement à cause
+        du NDK r27 et de clang 18.
+      ? Je ne sais pas exactement ce qui pose problème entre le NDK et le PCH.
 
-Enfin, deux lignes disent où vont les fichiers produits :
+    with filter("system:HarmonyOS"):
+        # PCH desactive (NDK OHOS clang, meme contrainte qu'Android)
+        pchheader("")
+        pchsource("")
+        usetoolchain("ohos-ndk")
+      ↑ Même chose pour HarmonyOS, avec le NDK de Huawei.
 
-objdir(...)
-targetdir(...)
+    with filter("system:Web"):
+        usetoolchain("emscripten")
+      ↑ Pour le Web, utilise emscripten.
 
-objdir est le dossier des fichiers intermédiaires pendant la compilation.
-targetdir est le dossier du fichier final produit, ici une bibliothèque
-statique. Les variables de la forme %{...} sont remplacées au moment de
-la construction. Par exemple la variable cfg.buildcfg vaut Debug ou
-Release selon la configuration.
+    with filter("system:XboxSeries || system:XboxOne"):
+        usetoolchain("xbox-clang")
+      ↑ Pour Xbox Series et Xbox One, utilise xbox-clang.
 
-Dépendances
+    with filter("config:Debug"):
+        defines(["_DEBUG", "DEBUG", "NKENTSEU_DEBUG"])
+        optimize("Off")
+        symbols(True)
+      ↑ En Debug : on définit trois macros dont _DEBUG qui est standard,
+        on désactive les optimisations, et on garde les symboles de
+        débogage.
 
-NKPlatform est appelé avec :
+    with filter("config:Release"):
+        defines(["NDEBUG", "NKENTSEU_RELEASE"])
+        optimize("Speed")
+        symbols(False)
+      ↑ En Release : on définit NDEBUG et NKENTSEU_RELEASE, on optimise
+        pour la vitesse, et on retire les symboles.
+      ? Je ne sais pas comment sont générés les noms NKENTSEU_DEBUG et
+        NKENTSEU_RELEASE, qui ne sont pas standards.
 
-nkentseudependson(
-    [],
-    selfexport="NKPlatform",
-    extra_includes=["src", "pch"],
-)
+    # Tests unitaires/benchmarks (desktop uniquement)
+      ↑ Commentaire d'origine. Les tests ne se compilent que sur les
+        plateformes de bureau.
 
-C'est une fonction propre à Nkentseu, ce n'est pas une fonction de Jenga.
-La liste vide au début dit que NKPlatform ne dépend d'aucun autre module.
-C'est cohérent avec sa position dans l'arbre : c'est le socle, construit
-en premier.
+    with filter("(system:Linux || system:macOS || (system:Windows && !options:windows-runtime=uwp && !system:XboxSeries && !system:XboxOne)) && !system:Android && !system:iOS || system:Web"):
+        with test():
+            testfiles(["tests/**.cpp"])
+      ↑ Cette longue condition dit que les tests ne se compilent que
+        sur Linux, macOS, Windows classique et Web. Pas sur Android,
+        iOS, UWP ou Xbox. En dessous, with test() déclare une suite de
+        tests attachée au projet, et testfiles liste les fichiers de test.
 
-selfexport donne le nom de la macro d'export du module, ici NKPlatform.
-extra_includes ajoute deux dossiers, src et pch, où le compilateur
-cherchera les en-têtes quand d'autres modules incluront ceux de
-NKPlatform.
-
-Filtres
-
-Le fichier contient beaucoup de filtres, qui appliquent des options selon
-le système, la configuration, ou un ensemble d'options.
-
-Filtre pour UWP
-
-Quand on compile pour Windows en mode UWP, on change les dossiers de sortie
-pour ne pas écraser ceux de Windows classique. C'est ce que fait le
-premier filtre, avec system:Windows && options:windows-runtime=uwp.
-
-Filtres de chaîne de compilation
-
-Pour Windows classique (pas UWP, pas Xbox), on utilise la chaîne
-TC_WINDOWS, définie dans jengaconfig. Le filtre exclut explicitement UWP,
-XboxSeries et XboxOne.
-
-Pour UWP, on utilise la chaîne xbox-clang. Pourquoi la même chaîne
-sert-elle pour UWP et pour Xbox ?
-
-Pour macOS, on utilise clang-native.
-
-Pour Android, on désactive le PCH en mettant des chaînes vides, puis on
-utilise android-ndk. Un commentaire dans le fichier explique que c'est un
-contournement à cause du NDK r27 et de clang 18. Qu'est-ce qui pose
-problème entre le NDK et le PCH ?
-
-Pour HarmonyOS, même chose, avec le NDK de Huawei.
-
-Pour le Web, on utilise emscripten.
-
-Pour Xbox Series et Xbox One, on utilise xbox-clang.
-
-Filtres de configuration
-
-En Debug, on définit trois macros dont _DEBUG qui est standard, on
-désactive les optimisations, et on garde les symboles de débogage.
-
-En Release, on définit NDEBUG et NKENTSEU_RELEASE, on optimise pour la
-vitesse, et on retire les symboles.
-
-Comment sont générés les noms NKENTSEU_DEBUG et NKENTSEU_RELEASE, qui
-ne sont pas standards ?
-
-Tests
-
-Le fichier déclare une suite de tests, mais seulement sur certaines
-plateformes. La longue condition du filtre dit que les tests ne se
-compilent que sur Linux, macOS, Windows classique et Web. Ils sont exclus
-sur Android, iOS, UWP et Xbox.
-
-En dessous, le bloc avec test() déclare une suite de tests attachée au
-projet, et testfiles liste les fichiers de test.
+---
 
 Ce que je ne comprends pas encore
 
@@ -175,6 +185,6 @@ Ce que je ne comprends pas encore
 - Comment sont générés les noms de macros NKENTSEU_DEBUG et
   NKENTSEU_RELEASE.
 
-Fichier annoté le 24/09/2026.
+Rapport rédigé le 25/09/2026.
 Version de Jenga : 2.8.0.
-Dernier commit du dépôt : 9c3fad3, daté du 2026-09-13.
+Dernier commit du dépôt Nkentseu : 9c3fad3, daté du 2026-09-13.
