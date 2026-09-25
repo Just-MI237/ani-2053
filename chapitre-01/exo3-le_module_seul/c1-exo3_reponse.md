@@ -194,11 +194,11 @@ L'enonce demande que ce qui vient en premier soit en bas et que NKMath
 soit en haut. C'est le sens des fondations : ce qui ne depend de rien
 est le socle, tout le reste repose dessus.
 
-- NKPlatform (ne depend de rien, construit en premier)
-  - NKCore (depend de NKPlatform)
+- NKMath (depend de NKContainers, NKCore, NKMemory et NKPlatform)
+  - NKContainers (depend de NKCore, NKMemory et NKPlatform)
     - NKMemory (depend de NKCore et NKPlatform)
-      - NKContainers (depend de NKCore, NKMemory et NKPlatform)
-        - NKMath (depend de NKContainers, NKCore, NKMemory et NKPlatform)
+      - NKCore (depend de NKPlatform)
+        - NKPlatform (ne depend de rien, construit en premier)
 
 Fleches de dependance
 
