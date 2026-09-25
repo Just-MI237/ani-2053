@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+MonEssai.jenga — cas 2 : avec dependson, sans links.
+"""
+
+from Jenga import *
+from jengaconfig import *
+
+
+with project("MonEssai"):
+    consoleapp()
+    language("C++")
+    cppdialect("C++17")
+    location(".")
+    files(["src/**.cpp"])
+    includedirs(["%{wks.location}/Kernel/Foundation/NKPlatform/src"])
+    dependson(["NKPlatform"])
+    objdir("%{wks.location}/Build/Obj/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
+    targetdir("%{wks.location}/Build/Bin/%{cfg.buildcfg}-%{cfg.system}/%{prj.name}")
+    with filter("system:Windows"):
+        usetoolchain(TC_WINDOWS)
+    with filter("system:Linux"):
+        usetoolchain("clang-native")

@@ -1,58 +1,63 @@
 Exercice 5 - Votre premier projet
 
-J'ai créé un projet MonEssai dans le dépôt Nkentseu, je l'ai déclaré au
-workspace, je l'ai vérifié avec jenga info, puis je l'ai construit.
+J'ai cree un projet MonEssai dans le depot Nkentseu, je l'ai declare au
+workspace, je l'ai verifie avec jenga info, puis je l'ai construit.
 
-Étape 1 - Création des fichiers
+Les trois fichiers demandes sont deposes a cote de ce rapport :
 
-J'ai créé deux fichiers dans Applications/MonEssai :
+- MonEssai.jenga : le fichier de projet
+- main.cpp : le programme source
+- La ligne d'inclusion ajoutee a Nkentseu.jenga est decrite ci-dessous
 
-Le premier est le fichier de projet MonEssai.jenga. Il déclare un projet
-nommé MonEssai, de type consoleapp, écrit en C++, avec la norme C++17.
-Il ne dépend d'aucun module du moteur : la liste passée à
-nkentseudependson est vide. Il indique aussi où vont les fichiers
-intermédiaires (objdir) et où va le binaire produit (targetdir). Deux
-filtres précisent la chaîne de compilation à utiliser : TC_WINDOWS pour
-Windows, et clang-native pour Linux.
+Etape 1 - Fichier de projet MonEssai.jenga
 
-Le second fichier est src/main.cpp. C'est un main qui ne fait rien et
-qui retourne simplement 0, comme l'énoncé le demande.
+Le fichier est depose a cote sous le nom MonEssai.jenga. Il declare un
+projet nomme MonEssai, de type consoleapp, ecrit en C++, avec la norme
+C++17. Il ne depend d'aucun module du moteur : la liste passee a
+nkentseudependson est vide. Il indique ou vont les fichiers
+intermediaires (objdir) et ou va le binaire produit (targetdir). Deux
+filtres precisent la chaine de compilation a utiliser : TC_WINDOWS
+pour Windows, et clang-native pour Linux.
 
-Étape 2 - Déclaration au workspace
+Etape 2 - Fichier source main.cpp
 
-Pour que Jenga voie le projet, il ne suffit pas de créer le fichier .jenga.
-Il faut aussi l'inclure dans le workspace. J'ai donc ajouté ce bloc à la
-fin de Nkentseu.jenga :
+Le fichier est depose a cote sous le nom main.cpp. C'est un main qui ne
+fait rien et qui retourne simplement 0.
 
-with include("Applications/MonEssai/MonEssai.jenga"):
+Etape 3 - Declaration au workspace
 
-    pass
+Pour que Jenga voie le projet, il ne suffit pas de creer le fichier
+.jenga. Il faut aussi l'inclure dans le workspace. J'ai ajoute ce bloc
+a la fin de Nkentseu.jenga :
 
-Le mot-clé pass est là parce que le bloc doit avoir un corps en Python.
+    with include("Applications/MonEssai/MonEssai.jenga"):
 
-Étape 3 - Vérification avec jenga info
+        pass
 
-Commande lancée :
+Le mot-cle pass est la parce que le bloc doit avoir un corps en Python.
 
-jenga info | grep -i "MonEssai"
+Etape 4 - Verification avec jenga info
 
-Résultat :
+J'ai lance jenga info | grep -i "MonEssai" et voici la sortie brute :
 
 MonEssai                                    ConsoleApp    C++        No     Yes
 
-Le projet apparaît bien dans la liste, avec le type ConsoleApp. C'est
-la preuve que le workspace l'a pris en compte.
+Etape 5 - Construction
 
-Étape 4 - Construction
+J'ai lance jenga build --project MonEssai --config Debug.
 
-Commande lancée :
+Bloc de configuration annonce par Jenga :
 
-jenga build --project MonEssai --config Debug
+Configuration: Debug
+Target:        Linux x86_64
+Toolchain:     host-clang
 
-Sortie obtenue :
+Ordre de construction :
 
 Build Order (1 projects):
   1. MonEssai [CONSOLE_APP]
+
+Compilation et liaison :
 
 Project: MonEssai                                            Kind: CONSOLE_APP
 
@@ -61,27 +66,24 @@ Found 1 source file(s)
 Linking...
 Built: Build/Bin/Debug-Linux/MonEssai/MonEssai
 
-Build Successful                                          Time: 0.41s
+Bilan final :
 
 BUILD COMPLETED
 Projects Built:  1/1
 Time:           0.41s
 Status:         SUCCESS
 
-Le projet est le seul dans l'ordre de construction parce qu'il ne dépend
-d'aucun autre module. La construction a réussi en 0.41 seconde.
-
 Ce que j'ai retenu
 
-- Un fichier .jenga seul ne suffit pas. Tant qu'il n'est pas inclus dans
-  le workspace, Jenga ne le voit pas et jenga build --project MonEssai
-  répondrait que le projet est introuvable.
-- Le type du projet est décidé par l'appel consoleapp() dans le fichier
+- Un fichier .jenga seul ne suffit pas. Tant qu'il n'est pas inclus
+  dans le workspace, Jenga ne le voit pas et jenga build --project
+  MonEssai repondrait que le projet est introuvable.
+- Le type du projet est decide par l'appel consoleapp() dans le fichier
   .jenga, pas par le nom du dossier.
-- La cible du binaire est donnée par targetdir, qui utilise des variables
-  comme cfg.buildcfg et cfg.system. C'est ce qui permet d'avoir un Debug
-  et un Release côte à côte sans qu'ils s'écrasent.
+- La cible du binaire est donnee par targetdir, qui utilise des
+  variables comme cfg.buildcfg et cfg.system. C'est ce qui permet
+  d'avoir un Debug et un Release cote a cote sans qu'ils s'ecrasent.
 
-Rapport rédigé le 25/09/2026.
+Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
-Dernier commit du dépôt Nkentseu : 9c3fad3, daté du 2026-09-13.
+Dernier commit du depot Nkentseu : 9c3fad3, date du 2026-09-13.
