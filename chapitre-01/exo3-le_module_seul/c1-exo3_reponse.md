@@ -188,24 +188,59 @@ Status:         ✓ SUCCESS
 
 ```
 
+
 Arbre de construction
 
 L'enonce demande que ce qui vient en premier soit en bas et que NKMath
 soit en haut. C'est le sens des fondations : ce qui ne depend de rien
 est le socle, tout le reste repose dessus.
 
-- NKMath (depend de NKContainers, NKCore, NKMemory et NKPlatform)
-  - NKContainers (depend de NKCore, NKMemory et NKPlatform)
+Cet arbre n'est pas une chaine. NKMath ne depend pas seulement du module
+juste en dessous de lui. Il depend directement de quatre modules
+differents. La forme correcte a donc quatre branches sous NKMath, qui
+convergent vers NKPlatform tout en bas.
+
+Lecture du bas vers le haut :
+
+- NKPlatform (ne depend de rien)
+  - NKCore (depend de NKPlatform)
     - NKMemory (depend de NKCore et NKPlatform)
-      - NKCore (depend de NKPlatform)
-        - NKPlatform (ne depend de rien, construit en premier)
+      - NKContainers (depend de NKCore, NKMemory et NKPlatform)
+        - NKMath (depend de NKContainers, NKCore, NKMemory et NKPlatform)
+
+Vu d'en haut, cela donne :
+
+NKMath
+  - NKContainers
+    - NKMemory
+      - NKCore
+        - NKPlatform
+  - NKCore
+    - NKPlatform
+  - NKMemory
+    - NKCore
+      - NKPlatform
+    - NKPlatform
+  - NKPlatform
+
+Les quatre branches sous NKMath ne sont pas la meme chose qu'une chaine.
+NKMath touche NKPlatform par quatre chemins differents, pas par un seul.
+C'est cette propriete qui decide de l'ordre de construction : Jenga
+construit chaque module apres tous ceux dont il depend, et rien n'empeche
+NKCore et NKMemory d'etre construits avant NKContainers si leurs propres
+dependances sont satisfaites.
 
 Fleches de dependance
 
-Pour trois modules, voici ce dont chacun depend directement :
+Pour quatre modules, voici ce dont chacun depend directement :
 
 NKMath
   --> NKContainers
+  --> NKCore
+  --> NKMemory
+  --> NKPlatform
+
+NKContainers
   --> NKCore
   --> NKMemory
   --> NKPlatform
@@ -224,23 +259,11 @@ Ce que ces fleches montrent
 
 La hierarchie des dependances ne suit pas la hierarchie des dossiers.
 NKMath depend directement de quatre modules differents, pas seulement
-de celui qui est juste au-dessus de lui dans l'arborescence. C'est
-cette hierarchie-la, celle des dependances, qui decide de l'ordre de
-construction. Jenga la calcule a partir des fichiers .jenga.
+de celui qui est juste au-dessus de lui dans l'arborescence. NKContainers
+se trouve au milieu de la chaine : il depend de trois modules, et il est
+lui-meme la dependance directe de NKMath.
 
-Datation de la mesure
-
-Commande :
-
-```
-git log -1 --format="%h %ad" --date=short
-```
-
-Sortie brute :
-
-```
-9c3fad3 2026-09-13
-```
-
+C'est Jenga qui calcule cet ordre a partir des fichiers .jenga. Aucune
+ligne du depot ne contient la liste ecrite a la main.
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
