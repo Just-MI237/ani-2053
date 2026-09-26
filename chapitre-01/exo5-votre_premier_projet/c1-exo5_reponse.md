@@ -127,5 +127,28 @@ Sortie brute :
 9c3fad3 2026-09-13
 ```
 
+
+Ce qui se passe si on oublie de declarer le projet
+
+J'ai voulu verifier ce point : que se passe-t-il si on cree le fichier
+Applications/MonEssai/MonEssai.jenga et le fichier src/main.cpp, mais
+qu'on ne touche pas au fichier Nkentseu.jenga ?
+
+Jenga ne voit pas le projet. La commande jenga info ne l'affiche pas
+dans la liste. La commande jenga build --project MonEssai --config Debug
+repond que le projet est introuvable, parce que le workspace n'a jamais
+charge sa declaration.
+
+C'est pour cette raison que l'etape 3 est indispensable. Le fichier
+.jenga d'un projet n'est utile que si un autre fichier .jenga, celui du
+workspace, l'inclut explicitement. Un projet qui n'est inclus nulle part
+n'existe pas pour Jenga.
+
+La ligne qui fait le lien est :
+
+    with include("Applications/MonEssai/MonEssai.jenga"):
+
+Cette ligne est dans Nkentseu.jenga, pas dans MonEssai.jenga. C'est ce
+qui distingue un projet actif d'un dossier de fichiers qui dorment.
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
