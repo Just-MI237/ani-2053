@@ -360,5 +360,18 @@ derniere construction. C'est ce qui rend le travail quotidien
 possible : apres avoir modifie un seul fichier, la reconstruction
 ne prend que quelques secondes.
 
+
+Comment les sorties ont ete capturees
+
+Pour separer la sortie de Jenga de celle de time, j'ai utilise une
+redirection vers un fichier :
+
+    time jenga build --project NKMath --config Debug > /tmp/exo7_froid.txt 2>&1
+    time jenga build --project NKMath --config Debug > /tmp/exo7_chaud.txt 2>&1
+
+La commande time ecrit son resultat (real, user, sys) sur la sortie
+d'erreur du shell, pas dans le fichier. J'ai donc note ces trois lignes
+a part, et j'ai colle le contenu des deux fichiers pour les sorties
+brutes de Jenga.
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
