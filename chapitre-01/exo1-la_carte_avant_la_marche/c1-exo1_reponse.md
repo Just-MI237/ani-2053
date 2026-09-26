@@ -389,5 +389,23 @@ Sortie brute :
 9c3fad3 2026-09-13
 ```
 
+
+Ce que change le projet de demarrage
+
+Le projet de demarrage est celui que Jenga lance quand on tape jenga run
+sans preciser --project. C'est une valeur par defaut enregistree dans le
+workspace.
+
+Dans le depot Nkentseu, c'est Sandbox. Si on ne le precise pas et qu'on
+ne donne pas non plus --project sur la ligne de commande, Jenga refuse de
+continuer parce qu'il ne sait pas quel binaire executer.
+
+J'ai verifie cette reponse dans le code de Jenga lui-meme :
+- Jenga/Commands/Info.py ligne 65 affiche cette valeur avec la commande
+  jenga info
+- Jenga/Core/Api.py ligne 1404 definit la fonction startproject qui
+  declare ce projet par defaut
+- Jenga/Docs/GUIDE_COMPLET_JENGA.md ligne 284 explique que jenga run
+  execute le projet demarre
 Mesure faite le 25/09/2026.
 Version de Jenga : 2.8.0.
