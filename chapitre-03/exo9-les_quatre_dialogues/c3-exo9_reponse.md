@@ -115,36 +115,56 @@ Apres avoir installe la bibliotheque manquante, Zenity fonctionne. Je
 l'ai relance. Cette fois, le programme ouvre la premiere boite de
 dialogue, mais Zenity ne rend jamais la main.
 
-J'ai verifie deux choses separement.
+J'ai d'abord cru que c'etait un probleme de WSLg. J'ai verifie sur
+Xvfb, un serveur X independant, sans gestionnaire de fenetres.
 
 Sur WSLg (:0), la commande suivante ne se termine pas :
 
     DISPLAY=:0 timeout 5 zenity --info --text="test"
     code: 124
 
+Sur Xvfb (localhost:98), la meme commande ne se termine pas non plus :
+
+    DISPLAY=localhost:98 timeout 5 zenity --file-selection --title="test"
+    file-selection code: 124
+
 Le code 124 est celui de timeout : la commande a ete tuee au bout de
 5 secondes sans avoir fini.
 
-Sur Xvfb (localhost:98), la meme commande se termine normalement :
+Le programme TestDialogues lui-meme, lance sur Xvfb, donne le meme
+resultat :
 
-    DISPLAY=localhost:98 timeout 5 zenity --info --text="test"
-    code: 0
+    === Dialogue 1 : OpenFileDialog ===
+    code retour: 124
 
-Le probleme ne vient donc pas de Zenity lui-meme, ni de son
-installation. Il vient du gestionnaire de fenetres de WSLg, qui ne sait
-pas afficher les boites GTK de Zenity.
+Il ecrit la premiere ligne, puis plus rien. Il attend.
 
-Troisieme cas, troisieme resultat
+La cause
 
-Avec Zenity installe mais bloque par WSLg, le programme TestDialogues
-reste bloque sur le premier dialogue. Il n'ecrit pas la deuxieme ligne
-du journal, parce qu'il est en attente de popen. Le programme ne plante
-pas, il attend.
+Zenity ouvre une boite de dialogue modale. Ce type de boite attend une
+action de l'utilisateur : choisir un fichier, ou cliquer sur Annuler.
+Tant que personne ne clique, Zenity ne retourne pas. Le popen de
+NkDialogs.cpp reste bloque sur la lecture du pipe.
 
-Conclusion des trois cas : le programme ne plante dans aucun. Il lit
-confirmed=false quand Zenity echoue immediatement. Il attend quand
-Zenity bloque. La seule difference est le temps d'attente. Aucune
-situation ne le fait sortir dans un etat incoherent.
+Ce n'est pas un bug du programme. C'est le comportement normal d'une
+boite modale. Une boite modale qui n'a pas d'utilisateur pour lui
+repondre attend indefiniment.
+
+Quatre cas, un seul comportement du programme
+
+En rassemblant les quatre tests, on voit que le programme ne plante
+dans aucun :
+
+- Sans Zenity installe : retour immediat avec confirmed=0.
+- Avec Zenity casse (bibliotheque manquante) : meme chose.
+- Avec Zenity fonctionnel sur WSLg, sans interaction possible :
+  programme bloque sur le dialogue 1.
+- Avec Zenity fonctionnel sur Xvfb, sans interaction possible :
+  programme bloque sur le dialogue 1.
+
+Les deux premiers cas continuent. Les deux derniers attendent. Dans
+aucun cas, le programme ne plante, ne dereference un pointeur invalide,
+ou ne sort dans un etat incoherent.
 
 Ce que cela montre sur l'annulation
 
