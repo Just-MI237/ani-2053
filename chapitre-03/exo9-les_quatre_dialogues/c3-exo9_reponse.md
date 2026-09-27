@@ -50,7 +50,10 @@ Une bibliotheque lui manque. J'ai essaye de l'installer. Le miroir
 Ubuntu sert un paquet dont le hash ne correspond pas, donc apt refuse
 le telechargement. L'installation n'a pas abouti.
 
-Zenity est donc present, mais il ne peut pas s'executer.
+Zenity est donc present, mais il ne peut pas s'executer. J'ai du
+corriger un probleme de miroir apt pour installer la bibliotheque
+manquante. Les hashs ne correspondaient pas en HTTP, ils
+correspondent en HTTPS. Zenity 3.42.1 fonctionne apres ca.
 
 Resultat du test
 
@@ -105,6 +108,43 @@ OpenMessageBox utilise system au lieu de popen :
 Le shell retourne 127 (command not found), mais OpenMessageBox est
 declaree void et n'utilise pas cette valeur. Elle rend la main tout de
 suite. Le programme continue.
+
+Le test avec Zenity installe
+
+Apres avoir installe la bibliotheque manquante, Zenity fonctionne. Je
+l'ai relance. Cette fois, le programme ouvre la premiere boite de
+dialogue, mais Zenity ne rend jamais la main.
+
+J'ai verifie deux choses separement.
+
+Sur WSLg (:0), la commande suivante ne se termine pas :
+
+    DISPLAY=:0 timeout 5 zenity --info --text="test"
+    code: 124
+
+Le code 124 est celui de timeout : la commande a ete tuee au bout de
+5 secondes sans avoir fini.
+
+Sur Xvfb (localhost:98), la meme commande se termine normalement :
+
+    DISPLAY=localhost:98 timeout 5 zenity --info --text="test"
+    code: 0
+
+Le probleme ne vient donc pas de Zenity lui-meme, ni de son
+installation. Il vient du gestionnaire de fenetres de WSLg, qui ne sait
+pas afficher les boites GTK de Zenity.
+
+Troisieme cas, troisieme resultat
+
+Avec Zenity installe mais bloque par WSLg, le programme TestDialogues
+reste bloque sur le premier dialogue. Il n'ecrit pas la deuxieme ligne
+du journal, parce qu'il est en attente de popen. Le programme ne plante
+pas, il attend.
+
+Conclusion des trois cas : le programme ne plante dans aucun. Il lit
+confirmed=false quand Zenity echoue immediatement. Il attend quand
+Zenity bloque. La seule difference est le temps d'attente. Aucune
+situation ne le fait sortir dans un etat incoherent.
 
 Ce que cela montre sur l'annulation
 
