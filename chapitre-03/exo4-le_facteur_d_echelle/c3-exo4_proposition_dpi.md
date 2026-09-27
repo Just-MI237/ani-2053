@@ -61,8 +61,12 @@ Bonne journee,
 Yann Vivien
 
 
----- debut du diff ----
+Le diff
 
+Le diff est joint. Il modifie un seul fichier :
+Kernel/Runtime/NKWindow/src/NKWindow/Platform/XLib/NkXLibWindow.cpp
+
+```
 diff --git a/Kernel/Runtime/NKWindow/src/NKWindow/Platform/XLib/NkXLibWindow.cpp b/Kernel/Runtime/NKWindow/src/NKWindow/Platform/XLib/NkXLibWindow.cpp
 index d5d6a061..fe4ee709 100644
 --- a/Kernel/Runtime/NKWindow/src/NKWindow/Platform/XLib/NkXLibWindow.cpp
@@ -110,5 +114,4 @@ index d5d6a061..fe4ee709 100644
  				out.PushBack(info);
  				++idx;
  			}
-
----- fin du diff ----
+```
