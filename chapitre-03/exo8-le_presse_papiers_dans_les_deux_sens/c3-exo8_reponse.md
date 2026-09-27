@@ -26,8 +26,9 @@ avec Ctrl+C :
 
     test externe
 
-Je n'ai pas mis d'image. Je voulais d'abord voir si le programme voyait
-le texte externe.
+J'ai aussi copie une image dans le presse-papiers Windows (une capture
+d'ecran avec Windows+Maj+S, puis Ctrl+C). Je voulais verifier si le
+programme voyait cette image externe.
 
 Resultat du test
 
@@ -61,8 +62,9 @@ fonctionne a l'interieur du programme.
 Phase image
 
 Au demarrage, le programme demande s'il y a une image disponible et
-recoit 0. Il n'y a pas d'image, ce qui est normal : je n'en avais pas
-mis.
+recoit 0. J'avais pourtant copie une image dans le presse-papiers
+Windows juste avant. Le programme ne la voit pas, comme il ne voyait
+pas le texte externe.
 
 Le programme cree ensuite une image 4x4 en RGBA8. Chaque pixel est
 RGBA=(200,100,50,255). Il la depose dans le presse-papiers, la relit,
