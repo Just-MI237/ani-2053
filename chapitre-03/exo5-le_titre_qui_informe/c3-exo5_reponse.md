@@ -5,8 +5,7 @@ informations : le nom du document, un asterisque quand il est modifie,
 et la taille courante de la fenetre. Le titre est mis a jour seulement
 quand quelque chose change, pas a chaque image.
 
-Le programme est depose a cote sous le nom c3-exo5_main.cpp. Il fait
-54 lignes.
+Le programme est depose a cote sous le nom c3-exo5_main.cpp.
 
 Datation de la mesure
 
@@ -23,95 +22,124 @@ Version de Jenga : 2.8.0.
 Ce que fait le programme
 
 Le programme cree une fenetre dont le titre initial est "document.txt".
-Il enregistre deux callbacks sur le gestionnaire d'evenements :
+Il enregistre trois callbacks sur le gestionnaire d'evenements :
 
 - un callback pour NkWindowResizeEvent, qui met a jour le titre quand
   la fenetre change de taille
 - un callback pour NkKeyPressEvent, qui bascule l'etat modifie quand
   on appuie sur la barre espace, puis met a jour le titre
+- un callback pour NkWindowCloseEvent, qui note la demande de fermeture
 
 La fonction updateTitle construit le titre en concatenant trois
 elements : le nom du document, un asterisque si modifie, et la taille
 courante de la fenetre lue par window.GetSize().
 
-La boucle principale ne touche pas au titre. Elle se contente de
-vider la file d'evenements :
+La boucle principale ne touche pas au titre. Elle se contente de vider
+la file d'evenements, puis dort 16 millisecondes pour reguler la
+cadence a environ 60 images par seconde. Le programme s'arrete tout
+seul apres 15 secondes.
 
-    while (window.IsOpen()) {
-        events.PollEvents();
-    }
+Mesures reelles
 
-C'est la bonne maniere de faire. Le titre n'est pas recalcule a chaque
-image. Il est mis a jour uniquement quand un evenement qui le concerne
-arrive : redimensionnement ou touche espace.
+Commande :
 
-Les trois etats observes
+    jenga run TestTitre --config Debug --platform x86_64 --target Linux
+
+Pendant les 15 secondes, j'ai redimensionne la fenetre trois fois et
+j'ai appuye deux fois sur la barre espace.
+
+Ligne finale du journal :
+
+    [fin] images=862, mises a jour titre=35, resize=32, espace=2
+
+Tableau recapitulatif :
+
+| Mesure | Valeur |
+|--------|--------|
+| Images parcourues | 862 |
+| Mises a jour du titre | 35 |
+| Evenements de resize | 32 |
+| Appuis sur espace | 2 |
+| Ratio mises a jour / images | 4,06 pour cent |
+
+Le titre a ete mis a jour 35 fois pendant que la boucle a parcouru 862
+images. Autrement dit, dans 96 pour cent des tours de boucle, le titre
+n'a pas ete touche. C'est la preuve chiffree que le titre n'est pas
+mis a jour a chaque image.
+
+Pourquoi 32 evenements pour trois redimensionnements
+
+Le gestionnaire de fenetres envoie un evenement a chaque changement de
+taille, meme d'un seul pixel. Un seul glissement de souris sur le bord
+de la fenetre produit des dizaines d'evenements successifs. C'est
+visible dans le journal :
+
+    [resize] evenement 6 : 1280x671
+    [resize] evenement 7 : 1280x659
+    [resize] evenement 8 : 1280x651
+    [resize] evenement 9 : 1280x651
+
+La taille varie d'un pixel ou deux a chaque fois. Le titre est mis a
+jour a chaque evenement, donc il affiche chaque valeur intermediaire.
+C'est ce que veut dire "au bon moment" : a chaque changement reel, pas
+a chaque image.
+
+Les trois etats du titre
 
 Etat 1, au lancement :
 
     document.txt - 1280x720
 
-Etat 2, apres redimensionnement de la fenetre :
+Etat 2, apres redimensionnement :
 
-    document.txt - 1024x600
+    document.txt - 1280x479
 
-La taille affichee change pour refleter la nouvelle taille reelle de
-la fenetre. Si on redimensionne plusieurs fois, chaque nouvelle taille
-apparait.
+La taille affichee correspond exactement a la taille reelle de la
+fenetre apres le dernier glissement.
 
-Etat 3, apres avoir appuye sur la barre espace :
+Etat 3, apres un appui sur la barre espace :
 
-    document.txt * - 1024x600
+    document.txt * - 1280x479
 
-L'asterisque apparait apres le nom du document. C'est la convention
-classique d'un editeur de texte : le document a ete modifie depuis la
-derniere sauvegarde.
+L'asterisque apparait apres le nom du document. Un second appui le fait
+disparaitre.
 
-Un quatrieme appui sur espace fait disparaitre l'asterisque. Le cycle
-est reversible.
-
-Tableau recapitulatif :
+Tableau recapitulatif des etats :
 
 | Etat | Titre affiche |
 |------|---------------|
 | Au lancement | document.txt - 1280x720 |
-| Apres redimensionnement | document.txt - 1024x600 |
-| Apres barre espace | document.txt * - 1024x600 |
-| Apres un second espace | document.txt - 1024x600 |
+| Apres redimensionnement | document.txt - 1280x479 |
+| Apres barre espace (modifie) | document.txt * - 1280x479 |
+| Apres second espace | document.txt - 1280x479 |
 
-Comment le titre est mis a jour au bon moment
+Ou le titre est mis a jour dans le code
 
-L'enonce demande de ne pas mettre a jour le titre a chaque image. Notre
-programme respecte cette consigne. Voici la preuve, lue dans le code :
+La fonction updateTitle n'est appelee qu'a quatre endroits :
 
-- La fonction updateTitle n'est appelee qu'a trois endroits.
-- Au demarrage, une fois, pour poser le titre initial.
+- Une fois au demarrage, pour poser le titre initial.
 - Dans le callback NkWindowResizeEvent, a chaque changement de taille.
 - Dans le callback NkKeyPressEvent, a chaque appui sur la barre espace.
+- Aucune autre.
 
-La boucle principale appelle uniquement events.PollEvents(). Elle ne
-touche pas au titre. Sans les callbacks, le titre ne changerait jamais.
-Sans la boucle, les callbacks ne seraient jamais appeles.
+La boucle principale ne touche pas au titre. Elle se contente de vider
+la file et de dormir.
 
 Ce que cela montre
 
-Le titre est un etat derive. Il depend de deux choses : la taille de
-la fenetre et l'etat modifie du document. Ces deux choses changent lors
+Le titre est un etat derive. Il depend de deux choses : la taille de la
+fenetre et l'etat modifie du document. Ces deux choses changent lors
 d'evenements precis. Recalculer le titre a chaque image serait du
-travail inutile : la plupart du temps, rien n'a change. C'est pour cela
-que l'enonce insiste sur "au bon moment".
-
-Les evenements de redimensionnement sont emis par le systeme quand la
-fenetre change de taille. Notre programme ne fait que repondre. Il ne
-surveille rien activement.
+travail inutile : la plupart du temps, rien n'a change. Les chiffres le
+montrent : 35 mises a jour pour 862 images.
 
 Le comportement a la fermeture
 
 La boucle se termine quand window.IsOpen() retourne faux. Le systeme
 envoie un evenement NkWindowCloseEvent quand l'utilisateur clique sur
-la croix. Nous n'enregistrons pas de callback pour cet evenement parce
-que NkWindow passe IsOpen a faux tout seul. La boucle principale voit
-le changement et sort proprement.
+la croix. Nous n'enregistrons pas de callback pour arreter le
+programme parce que NkWindow passe IsOpen a faux tout seul. La boucle
+principale voit le changement et sort proprement.
 
 Mesure faite le 27/09/2026.
 Version de Jenga : 2.8.0.

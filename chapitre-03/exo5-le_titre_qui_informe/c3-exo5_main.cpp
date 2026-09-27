@@ -6,6 +6,8 @@
 #include "NKLogger/NkLog.h"
 
 #include <cstdio>
+#include <thread>
+#include <chrono>
 
 using namespace nkentseu;
 
@@ -21,8 +23,11 @@ int nkmain(const NkEntryState &state) {
 
     bool modified = false;
     NkEventSystem& events = NkEvents();
+    int updateCount = 0;
+    int resizeCount = 0;
+    int spaceCount = 0;
 
-    auto updateTitle = [&window, &modified]() {
+    auto updateTitle = [&window, &modified, &updateCount]() {
         auto size = window.GetSize();
         char buf[128];
         if (modified) {
@@ -31,24 +36,45 @@ int nkmain(const NkEntryState &state) {
             snprintf(buf, sizeof(buf), "document.txt - %ux%u", size.x, size.y);
         }
         window.SetTitle(NkString(buf));
+        updateCount++;
+        logger.Infof("[titre] appel %d : %s", updateCount, buf);
     };
 
     events.AddEventCallback<NkWindowResizeEvent>([&](NkWindowResizeEvent* e) {
-        (void)e;
+        resizeCount++;
+        logger.Infof("[resize] evenement %d : %ux%u", resizeCount, e->GetWidth(), e->GetHeight());
         updateTitle();
     });
 
     events.AddEventCallback<NkKeyPressEvent>([&](NkKeyPressEvent* e) {
         if (e->GetKey() == NkKey::NK_SPACE) {
+            spaceCount++;
             modified = !modified;
+            logger.Infof("[espace] appui %d, modifie=%d", spaceCount, (int)modified);
             updateTitle();
         }
     });
 
+    events.AddEventCallback<NkWindowCloseEvent>([&](NkWindowCloseEvent* e) {
+        (void)e;
+        logger.Info("[close] demande de fermeture recue");
+    });
+
     updateTitle();
 
+    int frameCount = 0;
+    auto start = std::chrono::steady_clock::now();
     while (window.IsOpen()) {
         events.PollEvents();
+        frameCount++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+        if (elapsed >= 15) break;
     }
+
+    logger.Infof("[fin] images=%d, mises a jour titre=%d, resize=%d, espace=%d",
+        frameCount, updateCount, resizeCount, spaceCount);
+
     return 0;
 }
