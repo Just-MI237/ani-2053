@@ -1,0 +1,20 @@
+=== xdpyinfo sur Xvfb :98 (192 dpi) ===
+  dimensions:    1920x1080 pixels (254x143 millimeters)
+  resolution:    192x192 dots per inch
+
+=== xrandr sur Xvfb :98 ===
+Screen 0: minimum 1 x 1, current 1920 x 1080, maximum 1920 x 1080
+screen connected 1920x1080+0+0 0mm x 0mm
+   1920x1080      0.00* 
+
+=== TestDpi sur Xvfb :98 (avec le patch) ===
+[2026-09-27 13:04:37.090] [INF] [default] [NkXLibWindow.cpp:607 in XLibFillDisplayInfoFromCrtc] -> [DBG-dpi] oi mm=0x0, screen=0, xlib=254x143
+[2026-09-27 13:04:37.091] [INF] [default] [: in ] -> dpiScale=2.000000
+
+=== xdpyinfo sur WSLg (:0) ===
+  dimensions:    1920x1080 pixels (508x285 millimeters)
+  resolution:    96x96 dots per inch
+
+=== TestDpi sur WSLg (:0) (avec le patch) ===
+[2026-09-27 13:04:37.116] [INF] [default] [NkXLibWindow.cpp:607 in XLibFillDisplayInfoFromCrtc] -> [DBG-dpi] oi mm=0x0, screen=0, xlib=508x285
+[2026-09-27 13:04:37.117] [INF] [default] [: in ] -> dpiScale=1.000000
