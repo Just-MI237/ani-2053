@@ -46,9 +46,7 @@ La fenetre A devait refuser de descendre en dessous de 400x300. Elle est
 descendue jusqu'a 1x1. La contrainte n'a pas ete respectee.
 
 La fenetre B devait pouvoir descendre tres bas. Elle est descendue a
-400x1. La largeur est restee a 400, la hauteur est descendue a 1. Je
-n'ai pas eu le temps de tirer aussi sur la largeur avant que le
-programme ne se termine.
+400x1. La largeur est restee a 400, la hauteur est descendue a 1.
 
 Ce que dit le code du backend
 
