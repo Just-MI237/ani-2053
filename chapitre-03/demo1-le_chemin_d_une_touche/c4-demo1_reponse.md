@@ -21,7 +21,7 @@ Un programme qui s'abonne a NkKeyPressEvent et affiche le code a
 chaque appui. Sa boucle appelle NkEvents().PollEvents() toutes les
 16 ms.
 
-Sortie brute, apres avoir appuye sur Q, B, C, Espace :
+Sortie brute, apres avoir appuye sur A, Q, B, C, Espace :
 
     [touche] 55 = NK_A
     [touche] 72 = NK_B
