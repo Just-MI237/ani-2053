@@ -94,6 +94,13 @@ J'ai choisi NkWindow::SetTitle. C'est un appel court, present dans tous
 les backends, et sa difference entre XLib et Win32 est lisible en
 quelques lignes.
 
+C'est un appel de l'interface publique. Sa declaration est a la
+ligne 109 de NkWindow.h :
+
+    void SetTitle(const NkString &title);
+
+Il prend une NkString en UTF-8 et retourne void.
+
 Implementation XLib, ligne 776 de NkXLibWindow.cpp :
 
     void NkWindow::SetTitle(const NkString &title) {
