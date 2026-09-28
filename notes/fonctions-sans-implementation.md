@@ -165,9 +165,64 @@ derniere dont le contexte a ete cree). Avec MakeCurrent avant chaque
 BeginFrame et ReleaseCurrent apres chaque Present, les deux fenetres
 rendent. Il faut un MakeCurrent explicite par fenetre et par frame.
 
-Ce que ces sept cas ont en commun
+8. GetClipboardImage : deux surcharges, dont une seulement sur Win32
 
-Les sept fonctions ont la meme structure. L'interface publique du
+Fonction concernee : NkWindow::GetClipboardImage.
+Plateforme : la version du commit 9c3fad33 que j'utilise, et celle
+plus recente de origin/main (465b791c).
+Fichier : Kernel/Runtime/NKWindow/src/NKWindow/Core/NkWindow.h
+
+Dans le commit 9c3fad33 que j'utilise, il n'y a qu'une version :
+
+    Ligne 240 :
+    bool GetClipboardImage(NkClipboardImage &out) const;
+
+Commande :
+
+    grep -rn "GetClipboardImage" Kernel/Runtime/NKWindow/src/
+
+Sortie brute :
+
+    NkWindowClipboardImage.cpp:36:
+    bool NkWindow::GetClipboardImage(NkClipboardImage &out) const {
+    NkWindow.h:240:
+    bool GetClipboardImage(NkClipboardImage &out) const;
+    NkWin32Window.cpp:1283:
+    bool NkWindow::GetClipboardImage(NkClipboardImage &out) const;
+
+Une seule signature.
+
+Dans la version plus recente du depot, 465b791c, il y en a deux :
+
+    Ligne 176 :
+    bool GetClipboardImage(NkVector<uint8> &rgba, int32 &w, int32 &h,
+                           NkString &motif) const;
+
+    Ligne 292 :
+    bool GetClipboardImage(NkClipboardImage &out) const;
+
+Ma reponse a la question posee
+
+J'ai appele la version qui prend NkClipboardImage&. Sur le commit que
+j'utilise, c'est la seule qui existe. Sur la version plus recente du
+depot, la seconde (celle a quatre arguments) est implementee dans
+NkWin32Window.cpp, ligne 1264. Son code fait de vraies operations :
+IsClipboardFormatAvailable, OpenClipboard, GetClipboardData, lecture
+du BITMAPINFOHEADER, et rend les pixels.
+
+Mais dans la version 465b791c, cette version a quatre arguments n'est
+pas dans le fichier de repli multiplateforme
+NkWindowClipboardImage.cpp. Elle n'est compilee que sur Win32. Le
+professeur l'a signalee comme un piege : une fonction qui rend faux
+sans rien essayer. C'est exact pour cette surcharge : sur les
+plateformes non-Windows, elle n'existe pas.
+
+Dans mon commit 9c3fad33, le piege n'existe pas encore, parce que la
+surcharge a quatre arguments n'y est pas presente.
+
+Ce que ces huit cas ont en commun
+
+Les huit fonctions ont la meme structure. L'interface publique du
 moteur promet quelque chose. Une plateforme donnee ne le tient pas. Et
 rien ne le signale. Pas d'erreur au demarrage, pas d'avertissement a
 l'appel, pas de valeur de retour fausse. L'appelant croit avoir
@@ -180,7 +235,7 @@ d'implementation sur la plateforme courante, trois choix sont
 possibles.
 
 Le premier est de se taire, comme aujourd'hui. L'appelant ne sait rien.
-C'est simple a implementer, mais c'est ce qui produit les sept cas
+C'est simple a implementer, mais c'est ce qui produit les huit cas
 ci-dessus.
 
 Le deuxieme est de rendre faux. SetCursor retournerait un bool, et
