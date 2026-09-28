@@ -103,16 +103,27 @@ Tableau comparatif
 | Taille physique | 1920x1080 | 1920x1080 |
 | Position | (0,0) | (0,0) |
 | dpiScale | 1.000000 | 1.040984 |
-| dpiX | 96.000000 | non affiche |
-| dpiY | 96.252632 | non affiche |
-| Refresh | 60 Hz | non affiche |
+| dpiX | 96.000000 | 99.934425 |
+| dpiY | 96.252632 | 100.116791 |
+| Refresh | 60 Hz | 60 Hz |
 | Primaire | 0 | 0 |
 
 Les deux environnements declarent un seul ecran de meme taille et meme
-position. La seule difference notable est le facteur d'echelle : 1.0
-sur WSLg, 1.040984 sur Xvfb. C'est la meme observation que l'exercice 4
+position. La difference notable est le facteur d'echelle : 1.0 sur
+WSLg, 1.040984 sur Xvfb. C'est la meme observation que l'exercice 4
 sous un autre angle : le facteur d'echelle vient du serveur, pas du
 moteur.
+
+Un detail que je n'avais pas remarque avant de remplir ce tableau :
+dpiX et dpiY ne sont jamais egaux. Sur WSLg, 96.000000 contre
+96.252632. Sur Xvfb, 99.934425 contre 100.116791. L'ecart est petit
+mais il est systematique.
+
+L'ecran n'est pas carre en pixels physiques. Sa largeur divisee par sa
+hauteur ne tombe pas exactement sur 16/9 comme la resolution logique.
+Le calcul du DPI se fait separement sur X et sur Y a partir de la
+taille en millimetres, et comme les deux rapports different legerement,
+les deux DPI different aussi. Le moteur ne fait pas la moyenne.
 
 Cela recoupe l'exercice 4 : le facteur d'echelle depend entierement de
 ce que le serveur X declare, et WSLg declare 96 dpi.
