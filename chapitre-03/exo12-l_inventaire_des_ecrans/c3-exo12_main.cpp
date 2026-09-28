@@ -50,12 +50,35 @@ int nkmain(const NkEntryState &state) {
     fprintf(stderr, "=== Ecran portant la fenetre ===\n");
     AfficheEcran(cur, -1);
 
+    // Positions a tester dans l'ordre. La troisieme est hors de l'ecran.
+    struct TestPos { int x, y; const char *label; };
+    TestPos positions[] = {
+        { 2500,  100, "au-dela du bord droit de l'ecran (2500,100)" },
+        {  100,  100, "retour en haut-gauche (100,100)" },
+        { -500,  100, "au-dela du bord gauche (-500,100)" },
+        {  100,  100, "retour en haut-gauche (100,100)" },
+    };
+    int nextPos = 0;
+
     auto start = std::chrono::steady_clock::now();
     int lastMoveCheck = 0;
     int lastMonX = -99999, lastMonY = -99999;
 
     while (window.IsOpen()) {
         NkEvents().PollEvents();
+
+        auto elapsedSec = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - start).count();
+
+        if (nextPos < 4 && elapsedSec >= (nextPos + 1) * 4) {
+            const TestPos &p = positions[nextPos];
+            fprintf(stderr, "[SetPosition] appel %d : (%d,%d) %s\n",
+                nextPos + 1, p.x, p.y, p.label);
+            fflush(stderr);
+            window.SetPosition(p.x, p.y);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            nextPos++;
+        }
 
         NkDisplayInfo mon = window.GetCurrentMonitor();
         if (mon.posX != lastMonX || mon.posY != lastMonY) {
@@ -72,7 +95,7 @@ int nkmain(const NkEntryState &state) {
 
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-        if (elapsed >= 45) break;
+        if (elapsed >= 25) break;
     }
 
     fprintf(stderr, "[fin] deplacements detectes : %d\n", lastMoveCheck);

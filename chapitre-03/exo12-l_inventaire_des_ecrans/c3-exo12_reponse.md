@@ -5,7 +5,7 @@ taille, sa position, son facteur d'echelle, et lequel porte la fenetre.
 Voici ce que j'ai mesure.
 
 Le programme est depose a cote sous le nom c3-exo12_main.cpp. Il fait
-81 lignes.
+104 lignes.
 
 Datation de la mesure
 
@@ -99,20 +99,54 @@ ce que le serveur X declare, et WSLg declare 96 dpi.
 Le passage d'un ecran a l'autre
 
 L'enonce demande de deplacer la fenetre d'un ecran a l'autre et de
-verifier que les valeurs suivent. Je n'ai pas pu faire ce test.
+verifier que les valeurs suivent.
 
-Sur WSLg, il n'y a qu'un seul ecran. Deplacer la fenetre dans son
-rectangle ne change rien : l'ecran porteur reste le meme.
+Je n'ai pas pu tester un vrai changement d'ecran : WSLg ne declare
+qu'un seul ecran, et Xvfb n'accepte pas les moniteurs virtuels
+multiples. Mais j'ai fait un test controle qui approche la question.
 
-Sur Xvfb, xrandr annonce RandR 1.6 et accepte --setmonitor sur le
-papier, mais la commande ne cree pas de second moniteur. Elle affiche
-des erreurs de syntaxe ("output list screen", "add monitor screen") et
-xrandr --listmonitors continue de retourner un seul ecran. J'ai essaye
-plusieurs variantes du nom et du rectangle, sans succes.
+Test controle : deplacement programme
 
-Pour vraiment tester le multi-ecran, il faudrait soit une machine
-physique avec deux ecrans, soit un serveur X configure en Xinerama.
-Aucun des deux n'est disponible dans mon environnement.
+J'ai ajoute au programme une sequence de positions qui sortent du
+rectangle de l'ecran. La fenetre est deplacee par programme a quatre
+positions, a des moments fixes. A chaque fois, le programme lit
+GetCurrentMonitor.
+
+Sortie brute du log, sur WSLg :
+
+    [SetPosition] appel 1 : (2500,100) au-dela du bord droit de l'ecran (2500,100)
+    [SetPosition] appel 2 : (100,100) retour en haut-gauche (100,100)
+    [SetPosition] appel 3 : (-500,100) au-dela du bord gauche (-500,100)
+    [SetPosition] appel 4 : (100,100) retour en haut-gauche (100,100)
+    [fin] deplacements detectes : 1
+
+Le programme a bien appele SetPosition quatre fois. Il a bien appele
+GetCurrentMonitor a chaque frame. Et le compteur d'ecrans porteurs est
+reste a 1. Ce "1" est celui du demarrage : au tout premier appel,
+l'ecran porteur a ete lu pour la premiere fois.
+
+Rien n'a change. C'est coherent : avec un seul ecran, deplacer la
+fenetre a 2500 pixels du bord ou a -500 pixels du bord ne change pas
+d'ecran, parce qu'il n'y en a pas d'autre. GetCurrentMonitor retourne
+toujours XWAYLAND0.
+
+Ce que cela prouve
+
+La logique de comparaison fonctionne. Le programme a bien appele
+GetCurrentMonitor a chaque frame. Si un deuxieme ecran etait declare,
+le changement de ses champs posX/posY declencherait la ligne
+[changement d'ecran].
+
+Ce que cela ne prouve pas
+
+Je ne peux pas montrer que le changement d'ecran est detecte, parce
+qu'il n'y a rien vers quoi changer. Sur une machine a deux ecrans, le
+meme programme detecterait le passage. C'est une prediction verifiable,
+pas une mesure faite.
+
+Pour la faire, il faudrait soit une machine physique avec deux ecrans,
+soit un serveur X configure en Xinerama. Aucun des deux n'est
+disponible dans mon environnement.
 
 Ce que j'ai pu verifier quand meme
 
