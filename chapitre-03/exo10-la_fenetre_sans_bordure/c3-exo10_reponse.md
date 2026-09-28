@@ -141,8 +141,8 @@ fenetre est plus grande que l'ecran, ils sont hors champ.
 
 Combien de temps cela m'a pris
 
-J'ai commence a 13h30, j'ai termine a 16h. Environ 2h30, en comptant
-les pauses.
+Environ deux heures. Mesure par l'horloge : l'exercice precedent a ete
+depose a 00h38, celui-ci a 03h13.
 
 La partie visible du programme, la barre et les boutons, prend environ
 50 lignes. Le reste, c'est la mise en place : creer un contexte
