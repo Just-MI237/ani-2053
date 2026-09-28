@@ -38,15 +38,34 @@ Sortie brute :
       30621 total
 
 Le module NKWindow fait 30621 lignes, reparties sur 35 fichiers .cpp
-et 74 fichiers .h. Il y a 127 fichiers en tout, ce qui inclut les
-fichiers Java, TypeScript et autres.
+et 74 fichiers .h. Il y a 127 fichiers en tout.
+
+Repartition complete par extension, commande :
+
+    find . -type f -name "*.*" | sed 's/.*\.//' | sort | uniq -c | sort -rn
+
+Sortie brute :
+
+         74 h
+         35 cpp
+          8 mm
+          3 java
+          2 ts
+          2 md
+          2 c
+          1 jenga
+
+Les 74 .h et 35 .cpp forment le coeur du module. Les 8 .mm sont du
+Objective-C++ pour Cocoa et UIKit, les 3 .java pour Android, les 2 .ts
+pour HarmonyOS. Les 2 .md sont de la documentation, les 2 .c et
+le .jenga sont des fichiers de build ou de liaison.
 
 Deux. Les backends de plateforme
 
 Commande :
 
     cd ~/Projets/Nkentseu/Kernel/Runtime/NKWindow/src/NKWindow/Platform
-    find . -name "*Window.cpp" -o -name "*Window.mm" | sort
+    find . \( -name "*Window.cpp" -o -name "*Window.mm" \) | sort
 
 Sortie brute :
 
