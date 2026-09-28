@@ -1,7 +1,7 @@
 Fonctions de l'interface publique sans implementation sur certaines
 plateformes
 
-Ce document regroupe sept observations faites au cours du Sprint 3.
+Ce document regroupe huit observations faites au cours du Sprint 3.
 Chacune a la meme forme : une fonction de l'interface publique du
 moteur promet quelque chose qu'une plateforme donnee ne tient pas, et
 rien ne le signale. Pas d'erreur, pas d'avertissement, pas de valeur
