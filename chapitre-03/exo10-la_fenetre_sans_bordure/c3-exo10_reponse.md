@@ -165,8 +165,7 @@ Ce que ca dit sur l'ecosysteme
 Dans beaucoup de frameworks, une fenetre sans bordure et une barre de
 titre custom demandent 20 lignes. Ici, il faut monter un contexte
 graphique, tirer un renderer, charger une police. C'est le prix a
-payer pour ne pas dependre d'une bibliotheque UI externe. Le moteur
-fournit les briques, mais pas la colle.
+payer pour ne pas dependre d'une bibliotheque UI externe.
 
 Mesure faite le 27/09/2026.
 Version de Jenga : 2.8.0.
