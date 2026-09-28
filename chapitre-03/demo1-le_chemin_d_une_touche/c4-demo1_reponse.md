@@ -21,18 +21,20 @@ Un programme qui s'abonne a NkKeyPressEvent et affiche le code a
 chaque appui. Sa boucle appelle NkEvents().PollEvents() toutes les
 16 ms.
 
-Sortie brute, apres avoir appuye sur plusieurs touches :
+Sortie brute, apres avoir appuye sur Q, B, C, Espace :
 
-    [touche] 41
-    [touche] 72
-    [touche] 70
-    [touche] 60
-    [touche] 82
-    [touche] 49
-    [touche] 63
-    [touche] 50
-    [touche] 57
-    [touche] 59
+    [touche] 55 = NK_A
+    [touche] 72 = NK_B
+    [touche] 70 = NK_C
+    [touche] 82 = NK_SPACE
+    [touche] 41 = NK_Q
+    [touche] 72 = NK_B
+    [touche] 70 = NK_C
+    [touche] 82 = NK_SPACE
+
+Le programme affiche le code et son nom. La conversion se fait avec
+NkKeyToString, declaree a la ligne 384 de NkKeyboardEvent.h. Chaque
+appui produit la paire (code, nom).
 
 Le chemin, en cinq etapes
 
