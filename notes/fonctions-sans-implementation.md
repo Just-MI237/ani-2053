@@ -249,8 +249,25 @@ C'est ce qui marcherait le mieux pour l'utilisateur, mais c'est un
 choix qui n'a pas toujours de sens (le comportement n'est pas le
 meme), et il faut le prendre fonction par fonction.
 
-Aucun des trois n'est evidemment bon. Chacun a un cout. C'est une
-decision d'architecture, pas de code.
+Aucun des trois n'est evidemment bon dans l'absolu. Chacun a un cout.
+Mais la lecture des huit cas ci-dessus permet de trancher, et je
+tranche.
+
+Quand la plateforme ne connait pas la notion, le silence se justifie.
+Un mobile n'a pas de curseur de souris. Une console n'a pas de
+presse-papiers. La fonction ne peut rien faire, et rendre faux serait
+du bruit.
+
+Quand la plateforme connait la notion, mais que seul le backend ne
+l'a pas ecrite, le silence devient un mensonge par omission. Un
+curseur sur Linux desktop, c'est un manque, pas une impossibilite. X11
+fournit XCreateFontCursor et XDefineCursor. La fonction devrait rendre
+un statut.
+
+La distinction tient donc a la plateforme, pas a la fonction. Une
+meme fonction peut se taire sur mobile et rendre un statut sur
+desktop. Changer un type de retour une fois vaut mieux que laisser
+croire pendant des annees. C'est mon choix, et je l'assume.
 
 Mesure faite le 28/09/2026.
 Version de Jenga : 2.8.0.
