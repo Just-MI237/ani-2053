@@ -152,6 +152,22 @@ Sortie brute du log, sur WSLg :
     [SetPosition] appel 4 : (100,100) retour en haut-gauche (100,100)
     [fin] deplacements detectes : 1
 
+Sortie brute du log, sur Xvfb (:98), avec le meme programme :
+
+    [changement d'ecran] fenetre=(710,340), nouvel ecran : nom="screen" pos=(0,0) dpiScale=1.040984
+    [SetPosition] appel 1 : (2500,100) au-dela du bord droit de l'ecran (2500,100)
+    [SetPosition] appel 2 : (100,100) retour en haut-gauche (100,100)
+    [SetPosition] appel 3 : (-500,100) au-dela du bord gauche (-500,100)
+    [SetPosition] appel 4 : (100,100) retour en haut-gauche (100,100)
+    [fin] deplacements detectes : 1
+
+Les deux environnements se comportent de la meme facon. Le programme
+appelle SetPosition quatre fois, appelle GetCurrentMonitor a chaque
+frame, et le compteur de changements d'ecran reste a 1. La seule
+difference entre les deux logs est la position initiale (710,340) sur
+Xvfb au lieu de (-32730,-32709) sur WSLg, et le dpiScale du seul ecran
+present.
+
 Le programme a bien appele SetPosition quatre fois. Il a bien appele
 GetCurrentMonitor a chaque frame. Et le compteur d'ecrans porteurs est
 reste a 1. Ce "1" est celui du demarrage : au tout premier appel,
