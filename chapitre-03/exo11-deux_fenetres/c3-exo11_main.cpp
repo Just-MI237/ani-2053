@@ -100,6 +100,7 @@ int nkmain(const NkEntryState &state) {
         // Rendu dans A
         if (wa.IsOpen()) {
             auto szA = wa.GetSize();
+            gfxA->MakeCurrent();
             if (gfxA->BeginFrame()) {
                 r2dA->Clear({80, 30, 30, 255});
                 r2dA->Begin();
@@ -112,11 +113,13 @@ int nkmain(const NkEntryState &state) {
                 gfxA->EndFrame();
                 gfxA->Present();
             }
+            gfxA->ReleaseCurrent();
         }
 
         // Rendu dans B
         if (wb.IsOpen()) {
             auto szB = wb.GetSize();
+            gfxB->MakeCurrent();
             if (gfxB->BeginFrame()) {
                 r2dB->Clear({30, 30, 80, 255});
                 r2dB->Begin();
@@ -129,6 +132,7 @@ int nkmain(const NkEntryState &state) {
                 gfxB->EndFrame();
                 gfxB->Present();
             }
+            gfxB->ReleaseCurrent();
         }
 
         frame++;

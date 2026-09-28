@@ -5,7 +5,7 @@ clic, laquelle l'a recu. Puis j'ai essaye de dessiner dans les deux et
 mesure ce que cela demande.
 
 Le programme est depose a cote sous le nom c3-exo11_main.cpp. Il fait
-153 lignes.
+157 lignes.
 
 Datation de la mesure
 
@@ -53,55 +53,84 @@ concernee est toujours (0,0).
 Second test : dessiner dans les deux
 
 J'ai ajoute un contexte graphique et un renderer 2D pour chaque
-fenetre. Le meme programme cree donc deux contextes OpenGL et deux
+fenetre. Le programme cree donc deux contextes OpenGL et deux
 renderers 2D, un par fenetre.
 
-Dans la boucle principale, pour chaque fenetre, le programme fait :
+Premier essai : deux contextes, un seul rend
 
-    gfx->BeginFrame()
-    r2d->Clear(couleur de fond)
-    r2d->Begin()
-    r2d->SetView(vue de la fenetre)
-    r2d->DrawFilledRect(...)
-    r2d->End()
-    gfx->EndFrame()
-    gfx->Present()
+Dans cet essai, je ne faisais rien de plus qu'a l'exercice 10, mais en
+double. Un BeginFrame, Clear, Begin, Draw, End, EndFrame, Present pour
+chaque fenetre, dans la meme boucle.
 
-Le programme fait cela deux fois, une fois pour A, une fois pour B,
-dans la meme iteration de la boucle.
+Resultat visuel : la fenetre A reste noire. La fenetre B affiche son
+fond violet et son rectangle bleu.
 
-Sortie brute, au demarrage et pendant 25 secondes :
+Sortie brute du log :
 
     idA=1 idB=2
     Deux contextes et deux renderers crees
     [frame] 60
     [frame] 120
     ...
-    [frame] 1500
-    [clic] fenetre A (id=1) at client=(120,250)
-    [fin]
 
-Sur l'ecran, les deux fenetres ont des couleurs differentes :
+Le programme ne signale pas d'erreur. Les deux contextes ont ete crees
+avec succes. Mais un seul rend quelque chose.
 
-- Fenetre A : fond rouge fonce, rectangle rouge plus clair au centre
-- Fenetre B : fond bleu fonce, rectangle bleu plus clair au centre
+La cause
 
-Les deux fenetres sont dessinees, chacune avec sa couleur. Les clics
-continuent d'etre detectes sur les deux.
+Un contexte OpenGL est une ressource par thread. A un instant donne,
+un seul contexte est courant. C'est lui qui recoit les appels gl*.
+Sans preciser lequel est courant, tous les appels vont au dernier
+contexte rendu courant par le systeme, ici B.
 
-Ce qui manquerait pour dessiner dans les deux, mesure
+Second essai : MakeCurrent a chaque frame
 
-Ce qui manque, ce n'est pas une fonction cachee dans NkWindow. C'est
-un deuxieme exemplaire de chaque objet de rendu :
+J'ai regarde l'interface de NkIGraphicsContext. Elle expose deux
+methodes, lignes 49 et 53 de NkIGraphicsContext.h :
 
-- un deuxieme contexte graphique, cree avec NkContextFactory::Create
-- un deuxieme renderer 2D, cree avec NkRenderer2DFactory::Create
-- un deuxieme appel a BeginFrame / EndFrame / Present par tour
-- une deuxieme vue, mise a jour quand la fenetre change de taille
+    virtual bool MakeCurrent() { return true; }
+    virtual void ReleaseCurrent() { }
 
-Le programme montre cela. Il n'y a pas de fonction qui dit dessine dans
-les deux fenetres avec une seule boucle. Il faut deux fois tout, et une
-boucle qui appelle les deux.
+J'ai modifie la boucle pour rendre courant chaque contexte avant de
+dessiner dedans, puis le relacher apres :
+
+    gfxA->MakeCurrent();
+    gfxA->BeginFrame();
+    ...dessin dans A...
+    gfxA->EndFrame();
+    gfxA->Present();
+    gfxA->ReleaseCurrent();
+
+    gfxB->MakeCurrent();
+    gfxB->BeginFrame();
+    ...dessin dans B...
+    gfxB->EndFrame();
+    gfxB->Present();
+    gfxB->ReleaseCurrent();
+
+Resultat visuel : les deux fenetres rendent.
+
+- Fenetre A : fond rouge fonce, rectangle rouge plus clair au centre.
+- Fenetre B : fond bleu fonce, rectangle bleu plus clair au centre.
+
+Les clics continuent d'etre attribues correctement a A ou B, comme au
+premier test.
+
+Ce qui manquait, mesure
+
+Ce qui manque pour dessiner dans deux fenetres n'est donc pas seulement
+deux contextes et deux renderers. C'est aussi un appel explicite a
+MakeCurrent et ReleaseCurrent autour de chaque rendu.
+
+Sans MakeCurrent : un seul contexte est courant, un seul rend.
+Avec MakeCurrent : les deux rendent.
+
+La ligne qui change tout est celle-ci :
+
+    gfxA->MakeCurrent();
+
+Une ligne par fenetre, par frame. Ce n'est pas une fonction cachee,
+c'est une discipline a tenir.
 
 Ce que cela montre
 
