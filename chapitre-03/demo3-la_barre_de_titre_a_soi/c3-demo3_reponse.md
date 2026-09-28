@@ -33,6 +33,38 @@ a manipuler la souris :
 - t = 30 s : agrandissement a 1200x800
 - t = 45 s : retour a 800x600 a (200,100)
 
+Les quatre etapes sont decidees par le programme lui-meme, ce qui evite
+d'avoir a manipuler la souris pour produire chaque etat. Le code qui
+les declenche :
+
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::steady_clock::now() - start).count();
+
+    if (lastStep < 0 && elapsed >= 1) {
+        lastStep = 0;
+        fprintf(stderr, "[etape 1] etat initial : 800x600 a (200,100)\n");
+    }
+    if (lastStep < 1 && elapsed >= 15) {
+        lastStep = 1;
+        window.SetPosition(400, 300);
+        fprintf(stderr, "[etape 2] deplacement a (400,300)\n");
+    }
+    if (lastStep < 2 && elapsed >= 30) {
+        lastStep = 2;
+        window.SetSize(MAX_W, MAX_H);
+        fprintf(stderr, "[etape 3] agrandissement a 1200x800\n");
+    }
+    if (lastStep < 3 && elapsed >= 45) {
+        lastStep = 3;
+        window.SetSize(800, 600);
+        window.SetPosition(200, 100);
+        fprintf(stderr, "[etape 4] retour a 800x600 a (200,100)\n");
+    }
+
+Les appels SetPosition et SetSize sont ceux de l'interface publique de
+NkWindow. C'est le meme code qui serait appele par un utilisateur qui
+deplace ou qui agrandit la fenetre a la souris.
+
 Resultat du test
 
 Sortie brute du programme :
@@ -49,6 +81,25 @@ Les quatre etapes se sont deroulees dans l'ordre. La barre de titre,
 les trois boutons et le titre ecrit sont visibles a chaque etat.
 Apres les appels a SetSize, la taille reelle de la fenetre correspond
 a ce qui a ete demande : 1200x800 en etape 3, 800x600 en etape 4.
+
+Trois captures d'ecran ont ete prises pendant le test :
+
+Etat 1, au demarrage, fenetre 800x600 a (200,100) :
+
+![Demarrage](c3-demo3_demarrage.png)
+
+Etat 2, apres deplacement a (400,300) :
+
+![Deplacement](c3-demo3_deplacement.png)
+
+Etat 3, apres agrandissement a 1200x800 :
+
+![Agrandissement](c3-demo3_agrandissement.png)
+
+Sur les trois images, la barre grise est visible en haut de la fenetre,
+avec le titre "Fenetre sans bordure" ecrit a gauche et les trois
+boutons a droite. Les symboles dans les boutons sont dessines : trait
+pour Minimize, carre pour Maximize, croix pour Close.
 
 Ce que la barre fait
 
