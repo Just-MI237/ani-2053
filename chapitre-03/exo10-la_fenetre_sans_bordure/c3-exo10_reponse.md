@@ -167,5 +167,5 @@ titre custom demandent 20 lignes. Ici, il faut monter un contexte
 graphique, tirer un renderer, charger une police. C'est le prix a
 payer pour ne pas dependre d'une bibliotheque UI externe.
 
-Mesure faite le 27/09/2026.
+Mesure faite le 28/09/2026.
 Version de Jenga : 2.8.0.
