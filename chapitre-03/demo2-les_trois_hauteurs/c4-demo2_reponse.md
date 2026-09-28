@@ -186,11 +186,15 @@ Il faut donc brancher l'action sur le front montant de l'etat, ou sur
 l'evenement NkKeyPressEvent, pas sur l'etat continu. La mesure
 ci-dessus montre ce qui se passerait sinon : cinq sauts pour un appui.
 
-Choix 4 (raccourci Ctrl+S) : essaye dans un callback
-NkKeyPressEvent qui lit les modificateurs avec HasCtrl() et compare
-la touche avec NK_S. Le raccourci se declenche une seule fois par
-appui. Le meme probleme ne se pose pas parce que le branchement est
-deja sur l'evenement, pas sur l'etat.
+Choix 4 (raccourci Ctrl+S) : non essaye. Le branchement propose est
+le meme que celui de la hauteur 1 : un callback NkKeyPressEvent qui
+lit les modificateurs avec HasCtrl() et compare la touche avec NK_S.
+Le raccourci se declencherait une seule fois par appui, pour la meme
+raison que la hauteur 1 : le branchement est sur l'evenement, pas sur
+l'etat. Je n'ai pas mesure ce cas, je le deduis du precedent.
+
+Mesure faite sur deux points : les trois hauteurs sur un seul appui
+(trois compteurs reels, 1, 2, 5) et le raccourci non mesure.
 
 Ce que cela montre
 
