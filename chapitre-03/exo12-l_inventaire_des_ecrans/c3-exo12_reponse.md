@@ -93,6 +93,27 @@ Le nom de l'ecran est "screen". Le facteur d'echelle est 1.040984, pas
 -dpi, utilise un DPI par defaut qui n'est pas 96. Sur WSLg, le DPI
 declare est exactement 96, donc le facteur tombe a 1.0.
 
+Tableau comparatif
+
+| Mesure | WSLg (:0) | Xvfb (:98) |
+|--------|-----------|------------|
+| Nombre d'ecrans | 1 | 1 |
+| Nom | XWAYLAND0 | screen |
+| Taille logique | 1920x1080 | 1920x1080 |
+| Taille physique | 1920x1080 | 1920x1080 |
+| Position | (0,0) | (0,0) |
+| dpiScale | 1.000000 | 1.040984 |
+| dpiX | 96.000000 | non affiche |
+| dpiY | 96.252632 | non affiche |
+| Refresh | 60 Hz | non affiche |
+| Primaire | 0 | 0 |
+
+Les deux environnements declarent un seul ecran de meme taille et meme
+position. La seule difference notable est le facteur d'echelle : 1.0
+sur WSLg, 1.040984 sur Xvfb. C'est la meme observation que l'exercice 4
+sous un autre angle : le facteur d'echelle vient du serveur, pas du
+moteur.
+
 Cela recoupe l'exercice 4 : le facteur d'echelle depend entierement de
 ce que le serveur X declare, et WSLg declare 96 dpi.
 
@@ -124,6 +145,18 @@ Le programme a bien appele SetPosition quatre fois. Il a bien appele
 GetCurrentMonitor a chaque frame. Et le compteur d'ecrans porteurs est
 reste a 1. Ce "1" est celui du demarrage : au tout premier appel,
 l'ecran porteur a ete lu pour la premiere fois.
+
+Le log de demarrage contient une ligne avec des valeurs etranges :
+
+    [changement d'ecran] fenetre=(-32730,-32709), nouvel ecran : nom="XWAYLAND0" pos=(0,0) dpiScale=1.000000
+
+Ces nombres negatifs ne correspondent a aucune position reelle. Ils
+viennent du fait que la fenetre n'est pas encore positionnee par le
+gestionnaire de fenetres au moment ou GetCurrentMonitor est appele la
+premiere fois. Le premier appel se fait avant que la position de la
+fenetre soit stabilisee, et GetPosition retourne une valeur temporaire
+du gestionnaire. Apres ce premier appel, toutes les positions sont
+normales.
 
 Rien n'a change. C'est coherent : avec un seul ecran, deplacer la
 fenetre a 2500 pixels du bord ou a -500 pixels du bord ne change pas
