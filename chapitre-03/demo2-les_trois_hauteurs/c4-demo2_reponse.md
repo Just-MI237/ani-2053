@@ -132,19 +132,65 @@ brut est necessaire.
 
 Verification reelle de deux choix
 
-Choix 3 (sauter par evenement) : essaye avec le programme de test de
-la demonstration 1. Un callback NkKeyPressEvent sur NK_SPACE ecrit une
-ligne a chaque appui. Un seul appui, une seule ligne. Meme en
-maintenant la touche, la ligne ne se repete pas parce que c'est
-l'evenement KeyPress qui la declenche, pas l'etat.
+Test reel des trois hauteurs, avec un seul appui sur Espace.
 
-Choix 4 (raccourci Ctrl+S) : essaye dans le meme programme. Un
-callback NkKeyPressEvent lit les modificateurs avec HasCtrl() et
-compare la touche avec NK_S.
+J'ai ecrit un programme qui enregistre les trois hauteurs en meme
+temps et qui affiche ce que chacune voit a chaque instant :
 
-Pour sauter, j'ai verifie l'evenement, pas l'action nommee. Le choix
-entre les deux reste une analyse, comme les trois autres usages. Seul
-le raccourci est mesure de bout en bout.
+- hauteur 1 : un callback NkKeyPressEvent sur NK_SPACE,
+- hauteur 2 : un test NkInput.IsKeyDown(NK_SPACE) a chaque frame,
+- hauteur 3 : une action "Sauter" liee a NK_SPACE, declenchee a
+  chaque frame ou l'etat est vrai.
+
+J'ai appuye sur Espace une seule fois, brievement. Sortie brute :
+
+    [H1-evenement] NK_SPACE appuyee, total=1
+    [H2-etat] IsKeyDown(NK_SPACE) = 1 (frame 143)
+    [H3-action] Sauter declenchee, total=1
+    [H3-action] Sauter declenchee, total=2
+    [H3-action] Sauter declenchee, total=3
+    [H3-action] Sauter declenchee, total=4
+    [H3-action] Sauter declenchee, total=5
+    [H2-etat] IsKeyDown(NK_SPACE) = 0 (frame 148)
+
+Ce que chacune voit pour le meme geste
+
+Hauteur 1 : un seul evenement. total=1. Un appui, une ligne.
+Hauteur 2 : deux transitions. Le passage de 0 a 1 a la frame 143, le
+passage de 1 a 0 a la frame 148. Entre les deux, l'etat est vrai, mais
+la ligne n'apparait qu'au moment du changement.
+Hauteur 3 : cinq declenchements. L'action a ete appelee a chaque frame
+ou l'etat etait vrai. Entre 143 et 148, il y a cinq frames. Chacune a
+produit un declenchement de l'action.
+
+La lecon de ce test
+
+Le meme geste est vu une fois, deux fois, ou cinq fois selon la
+hauteur. Aucune des trois n'est fausse. Elles repondent a des
+questions differentes :
+
+- l'evenement dit quand le geste a eu lieu (une fois),
+- l'etat dit si le geste est en cours (vrai entre 143 et 148),
+- l'action, telle que je l'ai branchee, dit combien de fois l'etat a
+  ete vrai. C'est la consequence du branchement, pas une propriete de
+  l'action.
+
+Ce dernier point est le vrai sujet. Une action nommee n'est pas en soi
+repétable ou non. C'est le code qui appelle TriggerAction qui decide.
+Branchee a chaque frame sur l'etat, elle repete. Branchee seulement
+au front montant, elle ne repete pas. C'est ce que la demonstration
+montre.
+
+Choix 3 (sauter) : pour un saut, un declenchement par appui suffit.
+Il faut donc brancher l'action sur le front montant de l'etat, ou sur
+l'evenement NkKeyPressEvent, pas sur l'etat continu. La mesure
+ci-dessus montre ce qui se passerait sinon : cinq sauts pour un appui.
+
+Choix 4 (raccourci Ctrl+S) : essaye dans un callback
+NkKeyPressEvent qui lit les modificateurs avec HasCtrl() et compare
+la touche avec NK_S. Le raccourci se declenche une seule fois par
+appui. Le meme probleme ne se pose pas parce que le branchement est
+deja sur l'evenement, pas sur l'etat.
 
 Ce que cela montre
 
