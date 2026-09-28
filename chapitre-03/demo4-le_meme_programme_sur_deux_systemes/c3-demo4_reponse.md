@@ -31,6 +31,24 @@ Le programme inclut NkPlatformDetect.h, puis affiche :
 Aucune de ces valeurs n'est ecrite en dur. Toutes viennent du
 compilateur et du header.
 
+Le header qui fait le travail
+
+Les macros de plateforme sont definies dans
+Kernel/Foundation/NKPlatform/src/NKPlatform/NkPlatformDetect.h.
+Quelques lignes :
+
+    ligne 96  : #define NKENTSEU_PLATFORM_WINDOWS
+    ligne 97  : #define NKENTSEU_PLATFORM_NAME "Windows"
+    ligne 194 : #define NKENTSEU_PLATFORM_LINUX
+    ligne 195 : #define NKENTSEU_PLATFORM_NAME "Linux"
+    ligne 779 : #define NKENTSEU_PLATFORM_DESKTOP
+
+La detection se fait plus haut dans le fichier, avec les macros du
+compilateur (_WIN32, __linux__, __APPLE__). Le header les lit, pose la
+bonne macro NKENTSEU_PLATFORM_XXX, et pose aussi la chaine lisible
+dans NKENTSEU_PLATFORM_NAME. Le programme de test ne fait que les
+afficher.
+
 Les deux compilations
 
 Commande Linux :
