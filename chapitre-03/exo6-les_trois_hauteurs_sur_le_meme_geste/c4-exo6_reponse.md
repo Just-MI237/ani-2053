@@ -5,6 +5,8 @@ trois fois, par trois mecanismes differents. Le carre est dessine dans
 une fenetre 800x400. Chaque appui le fait avancer de 100 pixels. Meme
 fichier source, choix par la variable d'environnement NK_MODE.
 
+Le programme est depose a cote sous le nom c4-exo6_main.cpp.
+
 Datation de la mesure
 
 Commande :
@@ -80,6 +82,25 @@ Sortie brute action :
 Les trois mecanismes produisent le meme resultat : trois appuis, le
 carre part de 50 et arrive a 350. A l'ecran, le carre avance de la meme
 facon dans les trois cas. L'utilisateur ne voit pas la difference.
+
+Quatre captures d'ecran ont ete prises pendant le mode event, a chaque
+etape du deplacement.
+
+Position initiale, carre a x=50 :
+
+![Position initiale](c4-exo6_position_initiale.png)
+
+Apres le premier appui, carre a x=150 :
+
+![Apres appui 1](c4-exo6_appui_1.png)
+
+Apres le deuxieme appui, carre a x=250 :
+
+![Apres appui 2](c4-exo6_appui_2.png)
+
+Apres le troisieme appui, carre a x=350 :
+
+![Apres appui 3](c4-exo6_appui_3.png)
 
 Ce que chacun connait du clavier
 
