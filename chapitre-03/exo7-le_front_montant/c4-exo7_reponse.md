@@ -57,6 +57,13 @@ Sortie brute :
 Un seul appui, 234 sauts. Le carre vole vers le haut de la fenetre et
 ne retombe plus. Chaque frame reapplique la force de saut.
 
+Ce nombre n'est pas une constante. Il depend directement de la duree
+pendant laquelle la touche est maintenue. Un second essai, avec un
+appui plus court, a donne 27 sauts au lieu de 234. La proportion est
+coherente : environ 120 sauts par seconde d'appui (un par frame a
+60 images par seconde), donc 234 sauts pour deux secondes, et 27 pour
+environ un quart de seconde.
+
 Le meme appui, en mode state sans filtre et en mode event sans filtre,
 donnait plusieurs sauts aussi. C'est la consequence de l'auto-repeat
 du systeme : quand une touche reste enfoncee, X11 envoie un faux
@@ -87,10 +94,14 @@ Mode event, avec un debounce de 200 ms :
     [event] ignore (auto-repeat a 4675 ms)
     [event] ignore (auto-repeat a 4693 ms)
 
-Le premier saut est a 4121 ms. Le deuxieme a 4525 ms, parce que
-l'utilisateur avait appuye une deuxieme fois dans ce test. Puis les
-lignes [event] ignore apparaissent a partir de 4543 ms : ce sont les
-auto-repeats, rejetes par le debounce.
+Le premier saut est a 4121 ms. Le deuxieme a 4525 ms, soit 404 ms
+plus tard. L'ecart est superieur au delai de debounce (200 ms), donc
+le filtre n'a pas pu le rejeter. Deux causes possibles : un second
+appui manuel, ou une repetition tardive du systeme. Je n'ai pas
+verifie laquelle des deux. Ce point n'est pas tranche.
+
+Puis les lignes [event] ignore apparaissent a partir de 4543 ms : ce
+sont les auto-repeats, rejetes par le debounce.
 
 Un second test, avec un seul appui court, donne :
 
