@@ -1,8 +1,9 @@
 Exercice 6 - Les trois hauteurs, sur le meme geste
 
 J'ai ecrit un programme qui fait avancer un carre a la fleche droite,
-trois fois, par trois mecanismes differents. Meme fichier source,
-choix par la variable d'environnement NK_MODE.
+trois fois, par trois mecanismes differents. Le carre est dessine dans
+une fenetre 800x400. Chaque appui le fait avancer de 100 pixels. Meme
+fichier source, choix par la variable d'environnement NK_MODE.
 
 Datation de la mesure
 
@@ -16,14 +17,21 @@ Sortie brute :
 
 Version de Jenga : 2.8.0.
 
+Ce que fait le programme
+
+Le programme cree une fenetre, un contexte OpenGL et un renderer 2D.
+A chaque image, il dessine un rectangle bleu de 50 pixels de cote, a la
+position horizontale courante. La position commence a 50 et augmente de
+100 a chaque appui utile sur la fleche droite.
+
 Les trois modes
 
-Mode event. Le programme s'abonne a NkKeyPressEvent. A chaque appui
-sur fleche droite, il incremente la position.
+Mode event. Le programme s'abonne a NkKeyPressEvent. A chaque appui sur
+fleche droite, il ajoute 100 a la position.
 
     ev.AddEventCallback<NkKeyPressEvent>([&](NkKeyPressEvent *e) {
         if (e->GetKey() == NkKey::NK_RIGHT) {
-            position += 1;
+            x += 100;
         }
     });
 
@@ -32,45 +40,46 @@ frame, et ne fait avancer que sur le front montant (passage de faux a
 vrai).
 
     bool now = NkInput.IsKeyDown(NkKey::NK_RIGHT);
-    if (now && !last) {
-        position += 1;
-    }
+    if (now && !last) { x += 100; }
     last = now;
 
 Mode action. Le programme lie une action nommee "Avancer" a la fleche
 droite, puis declenche l'action sur le front montant.
 
-    actions.CreateAction("Avancer", [&](...){ position += 1; });
+    actions.CreateAction("Avancer", [&](...){ if (p) x += 100; });
     actions.AddCommand(NkActionCommand("Avancer", NkInputCode::Key(NkKey::NK_RIGHT)));
 
 Les trois mesures
 
-Commande :
-
-    NK_MODE=event jenga run TestTroisHauteurs --config Debug --platform x86_64 --target Linux
-
-Pour chaque mode, j'ai appuye une seule fois sur fleche droite.
+Pour chaque mode, j'ai appuye trois fois sur fleche droite.
 
 Sortie brute event :
 
     === Mode : event ===
-    [event] Fleche droite recue, position=1
-    [fin] mode=event, position finale=1
+    [event] Fleche droite, x=150
+    [event] Fleche droite, x=250
+    [event] Fleche droite, x=350
+    [fin] mode=event, position finale x=350
 
 Sortie brute state :
 
     === Mode : state ===
-    [state] front montant, position=1
-    [fin] mode=state, position finale=1
+    [state] front montant, x=150
+    [state] front montant, x=250
+    [state] front montant, x=350
+    [fin] mode=state, position finale x=350
 
 Sortie brute action :
 
     === Mode : action ===
-    [action] Avancer, position=1
-    [fin] mode=action, position finale=1
+    [action] Avancer, x=150
+    [action] Avancer, x=250
+    [action] Avancer, x=350
+    [fin] mode=action, position finale x=350
 
-Les trois mecanismes produisent le meme resultat : un appui, un
-avancement. Les trois programmes finissent avec position=1.
+Les trois mecanismes produisent le meme resultat : trois appuis, le
+carre part de 50 et arrive a 350. A l'ecran, le carre avance de la meme
+facon dans les trois cas. L'utilisateur ne voit pas la difference.
 
 Ce que chacun connait du clavier
 
@@ -82,10 +91,10 @@ Le mode state connait aussi la touche exacte. Il interroge
 NkInput.IsKeyDown(NkKey::NK_RIGHT). Si on veut changer la touche, il
 faut changer l'argument.
 
-Le mode action ne connait pas la touche. Il connait un nom,
-"Avancer". Le lien entre le nom et la touche est ailleurs, dans la
-ligne AddCommand. Pour changer la touche, il faut changer cette
-ligne, pas le handler.
+Le mode action ne connait pas la touche. Il connait un nom, "Avancer".
+Le lien entre le nom et la touche est ailleurs, dans la ligne
+AddCommand. Pour changer la touche, il faut changer cette ligne, pas
+le handler.
 
 Tableau recapitulatif
 
@@ -97,13 +106,13 @@ Tableau recapitulatif
 
 Ce que cela change pour le code
 
-Dans les modes event et state, le code de la regle (avancer d'une
-case) est melange avec le code de l'entree (c'est la fleche droite).
+Dans les modes event et state, le code de la regle (avancer de 100
+pixels) est melange avec le code de l'entree (c'est la fleche droite).
 Si on veut que la fleche haut avance aussi, il faut modifier la regle.
 
 Dans le mode action, le code de la regle ne mentionne aucune touche.
-Il dit seulement : quand l'action "Avancer" est declenchee, avancer
-d'une case. On peut ajouter la fleche haut comme commande de la meme
+Il dit seulement : quand l'action "Avancer" est declenchee, avancer de
+100 pixels. On peut ajouter la fleche haut comme commande de la meme
 action, la regle ne change pas.
 
 C'est la difference entre une regle qui connait le clavier et une
@@ -111,15 +120,16 @@ regle qui ne le connait pas.
 
 Ce que cela montre
 
-Les trois hauteurs font la meme chose pour l'utilisateur : un appui,
-un avancement. Mais elles ne le font pas de la meme maniere pour le
-programmeur. Plus on s'eloigne du clavier (de event vers action), plus
-la regle devient independante du peripherique.
+Les trois hauteurs font la meme chose pour l'utilisateur : trois
+appuis, le carre arrive au meme endroit. Mais elles ne le font pas de
+la meme maniere pour le programmeur. Plus on s'eloigne du clavier (de
+event vers action), plus la regle devient independante du
+peripherique.
 
 C'est le sujet du chapitre : separer les regles de l'entree. Une
-regle qui dit "avancer d'une case quand Avancer est declenchee" peut
-etre declenchee par un clavier, une manette, un ecran tactile, ou un
-journal de rejeu, sans changement.
+regle qui dit "avancer de 100 pixels quand Avancer est declenchee"
+peut etre declenchee par un clavier, une manette, un ecran tactile, ou
+un journal de rejeu, sans changement.
 
 Mesure faite le 29/09/2026.
 Version de Jenga : 2.8.0.
