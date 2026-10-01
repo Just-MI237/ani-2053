@@ -1,0 +1,1 @@
+shell : 36, hand : 80, ratio : 222

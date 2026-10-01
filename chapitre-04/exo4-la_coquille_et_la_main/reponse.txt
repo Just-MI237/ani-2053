@@ -1,0 +1,38 @@
+Ce que la coquille me donne :
+
+NkCanvasApp ouvre la fenetre et cree la cible de rendu. Elle monte
+l'horloge et applique le plafond du pas de temps. Elle choisit le
+backend graphique (OpenGL, Vulkan, DirectX, Metal ou logiciel) en
+lisant la ligne de commande et l'environnement. Elle tient la boucle
+principale dans l'ordre temps, evenements, mise a jour, Clear, dessin,
+Display. Elle gere la mise en page et le redimensionnement. Elle
+detruit la cible de rendu avant de fermer la fenetre, ce qui evite un
+plantage a la sortie. Elle gere la suspension et la reprise au retour
+d'arriere-plan. Le programme tient en 36 lignes utiles au lieu de 80.
+
+Ce qu'elle me prend :
+
+La coquille decide de l'ordre des operations. Je ne peux pas, par
+exemple, dessiner apres Display, ou mettre a jour apres le rendu : la
+boucle impose sa sequence. Elle decide du choix du backend : mon
+programme ne sait pas lequel sera utilise, et c'est elle qui le
+resout. Elle impose une structure de classe derivee avec des methodes
+virtuelles a surcharger, ce qui est plus lourd qu'une fonction main
+libre. Elle fixe la duree de vie des objets : le contexte et le
+renderer sont caches, je n'y ai acces que par les accesseurs. Et elle
+ajoute une couche d'indirection : quand quelque chose ne marche pas,
+je ne sais pas si le probleme vient de mon code ou de la coquille.
+
+Quand je choisirais la main :
+
+Quand j'ai besoin d'un controle precis sur l'ordre des operations, par
+exemple pour intercaler des calculs lourds entre le Clear et le
+dessin, ou pour rendre dans deux fenetres en alternance avec des
+timings serres. Quand je veux tester une partie seulement du
+programme sans monter une fenetre (le banc de Gemcrush fonctionne
+sans ecran ni GPU, c'est un point que la coquille elle-meme permet).
+Quand j'ecris un programme qui n'est pas un jeu, par exemple un outil
+en ligne de commande qui utilise un contexte graphique hors ecran.
+Dans ces cas, ecrire la boucle a la main vaut les 44 lignes
+supplementaires, parce qu'on maitrise chaque etape.
+
