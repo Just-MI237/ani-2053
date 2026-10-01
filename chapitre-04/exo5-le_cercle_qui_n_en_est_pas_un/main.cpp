@@ -59,7 +59,7 @@ int main()
 
         if (g == 0.0)
         {
-            printf("%ld %ld ecart JAMAIS\n", r, n);
+            printf("%ld %ld 0 JAMAIS\n", r, n);
             continue;
         }
 
