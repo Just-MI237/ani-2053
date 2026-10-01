@@ -1,9 +1,9 @@
 Exercice 1 - Le journal des evenements
 
-J'ai ecrit un programme qui affiche chaque evenement recu, avec son
-type, et qui compte le total par seconde. J'ai ensuite fait une minute
-d'usage normal : bouger la souris, taper quelques touches, redimensionner
-la fenetre, puis rester immobile.
+J'ai ecrit un programme qui affiche chaque evenement recu, avec sa
+famille et son type, et qui compte le total. J'ai ensuite fait une
+minute d'usage normal : bouger la souris, taper quelques touches,
+redimensionner la fenetre, puis rester immobile.
 
 Datation de la mesure
 
@@ -25,66 +25,82 @@ evenements aux callbacks enregistres, PollEvent donne l'evenement un a
 un. Cela permet de voir tous les types, pas seulement ceux auxquels on
 s'abonne.
 
-A chaque evenement, il affiche le nom du type, avec GetTypeStr(). Il
-compte aussi le total par seconde pour voir la densite.
+A chaque evenement, il affiche deux choses :
+
+- la famille, lue avec GetCategory() et convertie avec
+  NkEventCategory::ToString,
+- le type precis, lu avec GetTypeStr().
+
+Exemple de ligne :
+
+    [event] INPUT|MOUSE / NK_MOUSE_MOVE
+
+La famille est INPUT|MOUSE (deux flags combines), le type est
+NK_MOUSE_MOVE.
 
 Le resultat global
 
 Sortie brute :
 
-    [fin] total=1888
+    [fin] total=1658
 
-1888 evenements pour 60 secondes d'usage normal. Cela fait environ 31
+1658 evenements pour 60 secondes d'usage normal. Cela fait environ 27
 evenements par seconde en moyenne.
 
 Repartition par type
 
 Commande :
 
-    grep "\[event\]" /tmp/journal.txt | sort | uniq -c | sort -rn | head -15
+    grep "\[event\]" /tmp/journal3.txt | sort | uniq -c | sort -rn | head -15
 
 Sortie brute :
 
-    878 [event] NK_MOUSE_MOVE
-    146 [event] NK_WINDOW_RESIZE_END
-    146 [event] NK_WINDOW_RESIZE_BEGIN
-    146 [event] NK_WINDOW_RESIZE
-    146 [event] NK_WINDOW_MOVE_END
-    146 [event] NK_WINDOW_MOVE_BEGIN
-    146 [event] NK_WINDOW_MOVE
-    109 [event] NK_WINDOW_PAINT
-      6 [event] NK_MOUSE_ENTER
-      5 [event] NK_MOUSE_LEAVE
-      4 [event] NK_TEXT_INPUT
-      4 [event] NK_KEY_RELEASED
-      4 [event] NK_KEY_PRESSED
-      1 [event] NK_WINDOW_SHOWN
-      1 [event] NK_WINDOW_FOCUS_GAINED
+    675 [event] INPUT|MOUSE / NK_MOUSE_MOVE
+    149 [event] WINDOW / NK_WINDOW_RESIZE_END
+    149 [event] WINDOW / NK_WINDOW_RESIZE_BEGIN
+    149 [event] WINDOW / NK_WINDOW_RESIZE
+    149 [event] WINDOW / NK_WINDOW_MOVE_END
+    149 [event] WINDOW / NK_WINDOW_MOVE_BEGIN
+    149 [event] WINDOW / NK_WINDOW_MOVE
+     62 [event] WINDOW / NK_WINDOW_PAINT
+      7 [event] INPUT|MOUSE / NK_MOUSE_ENTER
+      6 [event] INPUT|MOUSE / NK_MOUSE_LEAVE
+      4 [event] INPUT|KEYBOARD / NK_TEXT_INPUT
+      4 [event] INPUT|KEYBOARD / NK_KEY_RELEASED
+      4 [event] INPUT|KEYBOARD / NK_KEY_PRESSED
+      1 [event] WINDOW / NK_WINDOW_SHOWN
+      1 [event] WINDOW / NK_WINDOW_FOCUS_GAINED
 
-Total par type :
+Repartition par famille :
 
-- souris (deplacement) : 878, soit 46 pour cent
-- fenetre (resize et deplacement) : 876, soit 46 pour cent
-- fenetre (peinture) : 109
+- WINDOW : 958 evenements, soit 58 pour cent
+- INPUT|MOUSE : 688 evenements, soit 41 pour cent
+- INPUT|KEYBOARD : 12 evenements, soit moins de 1 pour cent
+
+Repartition par type :
+
+- souris (deplacement) : 675, soit 41 pour cent
+- fenetre (resize et deplacement) : 894, soit 54 pour cent
+- fenetre (peinture) : 62
 - clavier (appui, relachement, texte) : 12
-- souris (entree, sortie) : 11
+- souris (entree, sortie) : 13
 - cycle de vie (affichee, focus) : 2
 
 Ce que cela montre
 
-La souris et la fenetre produisent 93 pour cent des evenements. Le
-clavier en produit moins de 1 pour cent. Un programme qui traite tous
-les evenements de la meme facon passe presque tout son temps sur deux
-sources qui ne sont pas le jeu lui-meme.
+La souris et la fenetre produisent plus de 99 pour cent des
+evenements. Le clavier en produit moins de 1 pour cent. Un programme
+qui traite tous les evenements de la meme facon passe presque tout son
+temps sur deux sources qui ne sont pas le jeu lui-meme.
 
 Le detail des resize est instructif. Le programme n'a fait qu'un seul
-redimensionnement, mais le journal compte 146 NK_WINDOW_RESIZE, plus
-146 NK_WINDOW_RESIZE_BEGIN et 146 NK_WINDOW_RESIZE_END. Soit 438
+redimensionnement, mais le journal compte 149 NK_WINDOW_RESIZE, plus
+149 NK_WINDOW_RESIZE_BEGIN et 149 NK_WINDOW_RESIZE_END. Soit 447
 evenements pour un seul geste. Le gestionnaire de fenetres envoie un
 evenement a chaque pixel de deplacement de la souris pendant le drag,
 et encadre la serie par un BEGIN et un END.
 
-Meme chose pour les deplacements : 438 evenements pour un seul
+Meme chose pour les deplacements : 447 evenements pour un seul
 deplacement de fenetre.
 
 Le resultat par seconde
@@ -98,9 +114,9 @@ Sortie brute pour les dernieres secondes :
     [seconde] 0 evenements
 
 Les cinq dernieres secondes n'ont produit aucun evenement, parce que
-l'usage etait immobile. Les 1888 evenements sont concentres dans les
+l'usage etait immobile. Les 1658 evenements sont concentres dans les
 premieres secondes, pendant les gestes. C'est pour cela que la moyenne
-de 31 par seconde est trompeuse : le rythme reel va de plusieurs
+de 27 par seconde est trompeuse : le rythme reel va de plusieurs
 centaines par seconde pendant un drag a zero quand on ne touche a rien.
 
 Le depose de fichier : essai et resultat
@@ -110,16 +126,9 @@ les evenements de la famille DROP. J'ai essaye.
 
 J'ai glisse un fichier depuis l'explorateur Windows vers la fenetre du
 programme, qui tourne sous WSLg. Aucun evenement NK_DROP n'est
-apparu. Le journal de cette session montre seulement :
-
-    68 [event] INPUT|MOUSE / NK_MOUSE_MOVE
-     7 [event] WINDOW / NK_WINDOW_FOCUS_LOST
-     7 [event] WINDOW / NK_WINDOW_FOCUS_GAINED
-     7 [event] INPUT|MOUSE / NK_MOUSE_LEAVE
-     7 [event] INPUT|MOUSE / NK_MOUSE_ENTER
-     2 [event] WINDOW / NK_WINDOW_RESIZE_END
-     2 [event] WINDOW / NK_WINDOW_RESIZE_BEGIN
-     2 [event] WINDOW / NK_WINDOW_RESIZE
+apparu. Le journal de cette session montre seulement du bruit :
+mouvements de souris, entrees et sorties de la fenetre, changements de
+focus.
 
 Les mouvements de la souris pendant le glissement sont bien arrives.
 Mais a l'instant du relachement, aucun evenement DROP n'a ete produit.
