@@ -1,9 +1,40 @@
+// Exercice 2 du chapitre 4 - Ce que forment les sommets.
+//
+// Ce programme lit des listes de sommets et dit ce que chacune forme,
+// selon son type de primitive. Pour un type accepte, il donne le nombre
+// d'unites (points, segments ou triangles), et le nombre de sommets
+// restants qui ne forment rien. Pour un type refuse, il le signale.
+//
+// Entree :
+//   N
+//   type1 s1
+//   type2 s2
+//   ...
+//
+// Sortie :
+//   une ligne par entree
+//   puis quatre bilans : POINTS, SEGMENTS, TRIANGLES, REFUSES
+//
+// La regle des restants :
+//   POINTS          : s points, 0 restant
+//   LINES           : s / 2 segments, s % 2 restants
+//   LINE_STRIP      : s - 1 segments si s >= 2, sinon 0 et s restants
+//   TRIANGLES       : s / 3 triangles, s % 3 restants
+//   TRIANGLE_STRIP  : s - 2 triangles si s >= 3, sinon 0 et s restants
+//   TRIANGLE_FAN    : idem TRIANGLE_STRIP
+//   tout autre type : REFUSE (comparaison exacte, QUADS compris)
+
 #include <cstdio>
 #include <cstring>
 
+// Compte ce que forme une liste de sommets selon son type.
+// Retourne le nombre d'unites, ou -1 si le type est refuse.
+// Renseigne restants (sommets qui ne forment rien) et unite (POINTS,
+// SEGMENTS ou TRIANGLES) par reference.
 static int compte(const char *type, int s, int &restants, const char *&unite) {
     restants = 0;
     unite = "";
+
     if (strcmp(type, "POINTS") == 0) {
         unite = "POINTS";
         return s;
@@ -30,7 +61,7 @@ static int compte(const char *type, int s, int &restants, const char *&unite) {
         restants = s;
         return 0;
     }
-    return -1;
+    return -1; // type inconnu, refuse
 }
 
 int main() {
