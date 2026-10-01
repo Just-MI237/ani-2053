@@ -1,0 +1,25 @@
+Ce que fait la barre sans ResetView :
+
+La barre suit le monde. Quand le monde defile vers la droite (centre_x
+augmente), la barre part vers la gauche de la meme quantite. En
+quelques secondes, elle sort entierement de l'ecran. Le joueur ne voit
+plus son interface, alors que le monde continue de defiler normalement
+et reste visible.
+
+Pourquoi :
+
+Une vue (NkView2D) est un etat du renderer, pas un objet qu'on dessine.
+SetView pose cet etat pour tout ce qui suit. La barre d'interface est
+dessinee apres le monde, dans la meme fonction OnRender. Si l'etat de
+vue n'a pas ete remis par defaut entre les deux, la barre herite de la
+vue du monde et part avec lui. C'est le meme principe que le Clear :
+tout ce qui suit un SetView en depend jusqu'au SetView suivant.
+
+Ou placer l'appel :
+
+Juste apres avoir fini de dessiner le monde, et avant de dessiner
+l'interface. C'est-a-dire entre la derniere primitive du monde et la
+premiere primitive de la barre. Dans mon programme, l'appel est place
+entre la boucle qui dessine les carres et le rectangle de la barre.
+ResetView remet la vue par defaut, qui correspond a la taille de la
+cible sans transformation.
