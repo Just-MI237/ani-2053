@@ -1,0 +1,31 @@
+Ce que la coquille fait a ma place :
+
+NkCanvasApp ouvre la fenetre et cree la cible de rendu. Elle monte
+l'horloge et applique le plafond du pas de temps. Elle choisit le
+backend graphique parmi les cinq disponibles (OpenGL, Vulkan, DirectX,
+Metal, logiciel). Elle tient la boucle principale dans l'ordre
+temps, evenements, mise a jour, Clear, dessin, Display. Elle lit la
+ligne de commande et l'environnement avant de creer la fenetre. Elle
+appelle OnLayout au moins une fois avant la premiere trame. Elle gere
+la suspension et la reprise au retour d'arriere-plan. Le programme
+complet tient en 19 lignes utiles, parce que tout cela est fait pour
+moi.
+
+Ce qui se passe si je configure dans OnInit :
+
+Rien. OnInit est appele apres la creation de la fenetre et de la
+cible. Les champs de Config() sont lus une seule fois, avant la
+creation. Modifier Config().title ou Config().width dans OnInit ne
+change rien a la fenetre deja ouverte. Le programme ne signale aucune
+erreur, il se contente d'ignorer mes valeurs. C'est le piege de
+l'exercice : on croit configurer, on ne configure pas. La seule bonne
+place est le constructeur de la classe derivee, ou la fenetre n'existe
+pas encore.
+
+Ce qui se passe sans NKMain.h :
+
+Le fichier compile mais l'edition de liens echoue. Le message parle
+d'un symbole d'entree de plateforme que je n'ai jamais ecrit (WinMain
+sous Windows, ou le point d'entree X11 sous Linux). NKMain.h declare
+le point d'entree natif de chaque plateforme et fournit le nkmain
+portable. Sans lui, mon nkmain existe mais rien ne l'appelle.
