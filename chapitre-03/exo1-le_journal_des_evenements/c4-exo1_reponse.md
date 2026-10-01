@@ -103,6 +103,33 @@ premieres secondes, pendant les gestes. C'est pour cela que la moyenne
 de 31 par seconde est trompeuse : le rythme reel va de plusieurs
 centaines par seconde pendant un drag a zero quand on ne touche a rien.
 
+Le depose de fichier : essai et resultat
+
+L'enonce demande aussi de « deposer un fichier » pour voir apparaitre
+les evenements de la famille DROP. J'ai essaye.
+
+J'ai glisse un fichier depuis l'explorateur Windows vers la fenetre du
+programme, qui tourne sous WSLg. Aucun evenement NK_DROP n'est
+apparu. Le journal de cette session montre seulement :
+
+    68 [event] INPUT|MOUSE / NK_MOUSE_MOVE
+     7 [event] WINDOW / NK_WINDOW_FOCUS_LOST
+     7 [event] WINDOW / NK_WINDOW_FOCUS_GAINED
+     7 [event] INPUT|MOUSE / NK_MOUSE_LEAVE
+     7 [event] INPUT|MOUSE / NK_MOUSE_ENTER
+     2 [event] WINDOW / NK_WINDOW_RESIZE_END
+     2 [event] WINDOW / NK_WINDOW_RESIZE_BEGIN
+     2 [event] WINDOW / NK_WINDOW_RESIZE
+
+Les mouvements de la souris pendant le glissement sont bien arrives.
+Mais a l'instant du relachement, aucun evenement DROP n'a ete produit.
+
+Ce n'est pas un defaut du programme. WSLg ne transmet pas le
+glisser-deposer de Windows vers les applications X11. Il faudrait un
+fichier glisse depuis une autre application Linux pour que le
+programme recoive un NK_DROP. Je n'ai pas pu le tester, je le signale
+comme limite de la plateforme.
+
 Ce que cela dit pour un programme
 
 Un programme qui s'abonne a tout et qui fait un traitement lourd sur
