@@ -1,0 +1,11 @@
+Ce que le refus m'apprend :
+
+Le refus me dit que le lecteur ne peut pas traiter ce fichier. Pour coupe.mp4, il me dit que le conteneur est bien reconnu par la sonde, qui lit les boites ISOBMFF jusqu'a la fin de l'en-tete, mais que la partie qui contient les pistes est absente. Pour texte.mp4, il me dit que ce n'est pas un fichier media du tout, la sonde elle-meme echoue. Dans les deux cas, le refus est propre : le programme continue, il ne plante pas, il ne lit pas des octets au hasard. C'est la premiere chose qu'un module honnete doit faire : echouer sans casser le reste.
+
+Ce qu'il ne m'apprend pas :
+
+Open rend seulement vrai ou faux. Il ne dit pas pourquoi il a refuse. Il ne distingue pas un fichier tronque d'un fichier d'un mauvais format, ni un conteneur reconnu sans piste d'un conteneur inconnu. Il ne dit pas non plus a quelle etape le refus s'est produit : est-ce la detection du conteneur, la lecture des pistes, ou la preparation du decodeur. Sans cette information, un utilisateur qui voit « ouvert : non » ne peut pas savoir s'il doit telecharger a nouveau le fichier, changer de format, ou signaler un bogue. Le refus est juste, mais muet.
+
+Comment j'ai trouve la cause :
+
+J'ai appele NkMediaProbe::ProbeFile sur les trois fichiers, en plus de Open. La sonde ne decode pas, elle lit seulement les en-tetes. Sur ouvrable.mp4, elle rapporte un conteneur MP4 et une piste video h264 de 320 par 240. Sur coupe.mp4, elle rapporte aussi un conteneur MP4, mais zero piste : le fichier a ete coupe avant la boite qui decrit les pistes, la sonde voit le debut et rien de plus. Sur texte.mp4, elle echoue des les premiers octets : ce n'est pas un conteneur connu. La comparaison des deux outils m'a donne la cause. Le lecteur refuse parce qu'il ne trouve pas les pistes, pas parce que le conteneur est mauvais. C'est un fichier tronque, pas un fichier d'un autre format. La sonde m'a montre exactement ou la coupure tombait, et m'a evite de conclure trop vite qu'un format echouait alors que c'etait le fichier qui etait incomplet.
