@@ -1,0 +1,11 @@
+Pourquoi une seule texture :
+
+Un atlas rassemble toutes les lettres dans une seule texture. Quand le programme dessine du texte, chaque lettre est un petit rectangle pris dans cette texture. Sans atlas, chaque lettre serait une texture separee, et chaque lettre demanderait un envoi a la carte graphique. Avec l'atlas, un seul envoi suffit pour tout le texte d'une frame. C'est la raison principale : moins d'allers-retours entre le processeur et la carte. L'atlas a aussi un second avantage. Les lettres partagent la meme texture, donc le filtrage et les bords se comportent pareil pour toutes. Sans atlas, deux lettres voisines pourraient avoir deux rendus differents.
+
+Ce que change la taille :
+
+Le nombre de glyphes ne change pas avec la taille. Il est de 191 dans les deux cas, parce que c'est la liste des caracteres demandes qui decide, pas leur taille. Ce qui change, c'est la surface de chaque glyphe. A 18 pixels, un glyphe mesure environ 18 sur 18. A 48, il mesure environ 48 sur 48, soit sept fois plus de surface. La texture suit : 512 sur 512 a taille 18, 1024 sur 1024 a taille 48. Le quadruplement de la surface de la texture ne suffit pas tout a fait a couvrir le septuplement de la surface des glyphes, mais il s'en approche. La consequence pratique : une police a 48 pixels prend beaucoup plus de memoire video qu'a 18 pixels. Et une police rastérisee a 12 puis affichee a 48 est floue, parce que ce sont les memes pixels etires. Il faut rastériser a la taille voulue.
+
+A quoi sert la marge entre glyphes :
+
+La marge entre deux glyphes empeche un glyphe de saigner sur son voisin. Quand le programme dessine une lettre, il lit les pixels de son rectangle dans la texture. Avec le filtrage lineaire, le materiel melange chaque pixel avec ses voisins immediats. Si la lettre A touche la lettre B sans marge, le bord droit de A melange un pixel de B, et inversement. On voit alors un morceau de la lettre voisine apparaitre sur le bord de la lettre courante. C'est le saignement. La marge met quelques pixels vides entre les glyphes, et ce sont ces pixels vides qui sont melanges avec les bords. Le resultat est propre. La marge coute un peu de place dans la texture, mais elle est indispensable.
