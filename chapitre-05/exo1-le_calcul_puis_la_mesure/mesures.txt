@@ -1,5 +1,5 @@
-image : icone.png, calcul : 4096, mesure : 4112, fichier : 276
-image : capture.png, calcul : 2359296, mesure : 2359312, fichier : 3925
-image : aplats.png, calcul : 786432, mesure : 786448, fichier : 1890
+image : icone.png, calcul : 40000, mesure : 40016, fichier : 4559
+image : capture.png, calcul : 8294400, mesure : 8294416, fichier : 603188
+image : aplats.png, calcul : 40000, mesure : 40016, fichier : 1931
 image : photo1.jpg, calcul : 12582912, mesure : 12582928, fichier : 2711447
 image : photo2.jpg, calcul : 12681216, mesure : 12681232, fichier : 2993987
