@@ -2,6 +2,8 @@
 // Charge cinq images avec NkImage, calcule la memoire attendue
 // (largeur fois hauteur fois octets par pixel), la mesure avec mallinfo2,
 // et la compare a la taille du fichier sur disque.
+// Les cinq images : une icone PNG, une capture PNG, un dessin a aplats PNG,
+// deux photographies d'appareil en JPEG.
 
 #include "NKImage/Core/NkImage.h"
 #include "NKWindow/NKMain.h"
@@ -17,6 +19,7 @@ using namespace nkentseu;
 
 // Memoire reellement allouee par le programme, en octets.
 // mallinfo2 rend le total des blocs vivants du tas (uordblks).
+// Cet outil voit les allocations du tas, pas les pages du systeme.
 static long long memoireAllouee()
 {
     struct mallinfo2 mi = mallinfo2();
