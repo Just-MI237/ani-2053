@@ -1,3 +1,9 @@
+// Datation de la mesure
+//
+// Commande : git log -1 --format="%h %ad" --date=short
+// Sortie brute : 9c3fad33 2026-09-13
+// Version Jenga : 2.8.0.
+//
 // lecteur.cpp
 // Ouvre trois fichiers avec le lecteur video de NKMedia, dont deux
 // qu'il refuse. Compte les images lues, interroge la sonde de conteneur,

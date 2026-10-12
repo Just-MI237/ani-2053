@@ -9,3 +9,10 @@ Le nombre de glyphes ne change pas avec la taille. Il est de 191 dans les deux c
 A quoi sert la marge entre glyphes :
 
 La marge entre deux glyphes empeche un glyphe de saigner sur son voisin. Quand le programme dessine une lettre, il lit les pixels de son rectangle dans la texture. Avec le filtrage lineaire, le materiel melange chaque pixel avec ses voisins immediats. Si la lettre A touche la lettre B sans marge, le bord droit de A melange un pixel de B, et inversement. On voit alors un morceau de la lettre voisine apparaitre sur le bord de la lettre courante. C'est le saignement. La marge met quelques pixels vides entre les glyphes, et ce sont ces pixels vides qui sont melanges avec les bords. Le resultat est propre. La marge coute un peu de place dans la texture, mais elle est indispensable.
+
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.

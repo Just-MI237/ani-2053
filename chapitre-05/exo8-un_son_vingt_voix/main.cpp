@@ -1,3 +1,9 @@
+// Datation de la mesure
+//
+// Commande : git log -1 --format="%h %ad" --date=short
+// Sortie brute : 9c3fad33 2026-09-13
+// Version Jenga : 2.8.0.
+//
 #include <iostream>
 #include <vector>
 

@@ -13,3 +13,10 @@ La memoire residente mesure le processus entier : le code, les bibliotheques, le
 Avant d'ouvrir cinquante photos :
 
 Cinquante photographies de 2048 sur 2048 en RGB24 occupent cinquante fois 12582912 octets, soit 629 millions d'octets, ou 629 Mo. C'est plus que la memoire d'un ordinateur d'entree de gamme. Avec photo2.jpg, 2752 sur 1536, cinquante occupent cinquante fois 12681216 octets, 634 Mo. Et si les photographies font 24 megapixels, comme un appareil recent, cinquante occupent 3,6 milliards d'octets, ou 3,6 Go. Le programme s'effondre avant d'en avoir ouvert la moitie. La lecon : la memoire se decide au chargement. Une photographie a la fois, traitee puis relachee, tient dans une fraction de la place. Les cinquante a la fois ne tiennent pas. Et le format de fichier n'y change rien : c'est la resolution qui commande.
+
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.
