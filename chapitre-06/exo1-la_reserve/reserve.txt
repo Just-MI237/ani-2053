@@ -1,0 +1,16 @@
+Tache :
+additionner mille entiers dans une variable locale, cent fois plus longue pour la tache longue.
+
+Reserve : 2.614 1.335 3.019
+Fils : 22.509 19.396 17.954
+Ouvriers : 8
+Tache longue : 8.500 7.072 8.796 21.734 25.887 20.601
+
+Pourquoi :
+La reserve est huit fois plus rapide que les fils pour la tache courte. Un fil coute environ cent microsecondes a creer : deux cents fils paient vingt millisecondes de creation pure, alors que deux cents taches dans la reserve ne paient rien, les ouvriers existent deja. La tache longue change l'ecart. Quand la tache dure cent fois plus, la creation d'un fil devient une fraction du travail total, et les deux versions se rapprochent. Mais la reserve reste devant, parce qu'elle evite aussi la creation, et parce que huit ouvriers bien occupes exploitent mieux les coeurs que deux cents fils qui se disputent le processeur.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.
