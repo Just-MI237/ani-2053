@@ -1,0 +1,12 @@
+Moyenne : 250.104
+Minimum : 235.258
+Maximum : 257.899
+Lissee : 247.871
+Moteur : 0.000
+Ecart : La moyenne mesuree est de 250 millisecondes, alors que l'estimation du moteur est de 0 milliseconde. L'ecart est enorme, et il vient de mon programme, pas du moteur. Mon serveur traite les messages par tours, avec NkChrono::SleepMilliseconds(10) entre chaque tour. Mon client, apres chaque envoi, attend la reponse dans une boucle qui dort 1 milliseconde entre deux DrainAll. Pour un aller-retour local, le temps reseau reel est de l'ordre de la dizaine de microsecondes. Ce sont mes deux attentes qui dominent le temps mesure, pas le reseau. Le moteur, lui, mesure le RTT dans son propre fil reseau, sans attente artificielle, donc il voit la vraie valeur, proche de zero en local. Mon experience ne mesure pas ce qu'elle pretend mesurer. Pour la corriger, il faudrait que le client n'attende pas avec Sleep entre deux DrainAll, mais lise la file en continu, et que le serveur traite les messages des qu'ils arrivent, sans Sleep. Je signale ce defaut plutot que de le masquer.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 039421b1 2026-10-15
+Version Jenga : 2.9.0.
