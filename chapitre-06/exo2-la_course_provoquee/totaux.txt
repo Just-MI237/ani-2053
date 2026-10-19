@@ -1,0 +1,24 @@
+Dix totaux :
+1934830
+1510800
+1562205
+1682047
+1536603
+1692955
+1843412
+1512062
+1609873
+1923388
+
+Un seul fil : 8000000 (attendu 8000000)
+
+Release : 1763452, 1616155, 1944288 (attendu 8000000)
+
+Pourquoi :
+Deux fils qui executent compteur += 1 en meme temps ne font pas une addition : ils font trois operations. Lire la valeur de compteur, ajouter un, ecrire la nouvelle valeur. Si deux fils lisent la meme valeur avant que l'un des deux ait ecrit, les deux ecrivent la meme valeur, et un increment est perdu. Plus les fils sont nombreux, plus les lectures se croisent, et plus le total s'eloigne de l'attendu. Les dix totaux en Debug varient entre 1,51 et 1,93 million pour 8 millions attendus : la perte depend du moment exact ou chaque fil est interrompu, donc de la charge de la machine. En Release, la course persiste, avec des totaux entre 1,61 et 1,94 million. Le compilateur n'a pas fusionne la boucle en une seule addition, parce que compteur est une variable globale et qu'il ne peut pas prouver qu'aucun autre fil n'y accede. La version Release ne protege donc pas contre la course : elle la rend seulement moins previsible. Un total juste une fois ne prouverait rien, et un total faux n'est pas une garantie de bogue : c'est la course elle-meme qui est le defaut.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.
