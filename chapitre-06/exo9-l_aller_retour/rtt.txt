@@ -20,6 +20,9 @@ Ma mesure, elle, est de 250 millisecondes en moyenne. Mais ce n'est pas le RTT d
 La formule de lissage que j'applique est la meme que celle du moteur, alpha = 0.125, avec un depart a 100 millisecondes. Elle donne 247.871 parce que les cent mesures tournent toutes autour de 250. Le moteur, lui, utilise la meme formule dans NkReliableUDP.h ligne 385, kAlpha = 0.125f, mais il ne l'applique jamais faute d'echantillon.
 L'ecart de 250 millisecondes n'est donc pas un ecart entre deux mesures du meme phenomene. C'est la difference entre une mesure dominee par mes attentes artificielles et une estimation qui n'a jamais recu d'echantillon. Pour corriger, il faudrait deux choses : envoyer un vrai PING du protocole pour alimenter le RTT du moteur, et supprimer les Sleep dans mon experience pour mesurer le vrai temps reseau.
 
+J'ai lu NetThreadLoop dans NkConnection.cpp ligne 1207, comme l'enonce le demande. Le fil reseau du moteur fait trois choses a chaque tour : PollSocket, UpdateConnections avec dt fixe a 0.016 seconde, puis un Sleep pour completer jusqu'a 16 millisecondes si le tour a ete plus rapide. Ce Sleep signifie que le moteur ne traite les paquets recus qu'environ soixante fois par seconde, pas en continu. C'est une contrainte de sa boucle, pas de mon programme.
+Ce rythme explique aussi pourquoi le RTT du moteur ne peut pas etre alimente par mes messages applicatifs. Le moteur n'envoie de PING que par son propre mecanisme interne, et met a jour son estimateur seulement a la reception du PONG correspondant, ligne 689 de NkReliableUDP.cpp. Mon programme n'envoie jamais de PING protocolaire, donc l'estimateur reste a zero.
+
 Datation de la mesure
 
 Commande : git log -1 --format="%h %ad" --date=short
