@@ -1,27 +1,12 @@
-Moyenne : 250.104
-Minimum : 235.258
-Maximum : 257.899
-Lissee : 247.871
-Moteur : 0.000
-Ecart :
-L'estimation du moteur est de 0 milliseconde parce qu'elle n'est jamais alimentee. Le moteur met a jour son RTT dans NkReliableUDP.cpp ligne 689, dans un bloc qui traite les paquets de controle :
-
-if ((header.flags & kFlagPing) != 0) {
-    if (mPingSentAt != 0) {
-        const float32 rtt = static_cast<float32>(NkNetNowMs() - mPingSentAt);
-        mRTT.Update(rtt);
-        mPingSentAt = 0;
-    }
-    return;
-}
-
-La mise a jour n'a lieu qu'a la reception d'un PONG, c'est-a-dire d'un paquet de reponse a un PING. Mon programme n'envoie jamais de PING. Il envoie un octet numerote et attend le meme octet en retour, par le meme canal fiable. Ce n'est pas un PING du protocole, c'est un message applicatif. Le moteur ne voit donc aucun echantillon RTT, et son estimateur reste a sa valeur initiale, 0.
-Ma mesure, elle, est de 250 millisecondes en moyenne. Mais ce n'est pas le RTT du reseau. Mon serveur traite les messages par tours, avec NkChrono::SleepMilliseconds(10) entre chaque tour. Mon client, apres chaque envoi, attend la reponse dans une boucle qui dort 1 milliseconde entre deux DrainAll. Pour un aller-retour local, le temps reseau reel est de l'ordre de la dizaine de microsecondes. Ce sont mes deux attentes qui dominent le temps mesure, pas le reseau.
-La formule de lissage que j'applique est la meme que celle du moteur, alpha = 0.125, avec un depart a 100 millisecondes. Elle donne 247.871 parce que les cent mesures tournent toutes autour de 250. Le moteur, lui, utilise la meme formule dans NkReliableUDP.h ligne 385, kAlpha = 0.125f, mais il ne l'applique jamais faute d'echantillon.
-L'ecart de 250 millisecondes n'est donc pas un ecart entre deux mesures du meme phenomene. C'est la difference entre une mesure dominee par mes attentes artificielles et une estimation qui n'a jamais recu d'echantillon. Pour corriger, il faudrait deux choses : envoyer un vrai PING du protocole pour alimenter le RTT du moteur, et supprimer les Sleep dans mon experience pour mesurer le vrai temps reseau.
-
-J'ai lu NetThreadLoop dans NkConnection.cpp ligne 1207, comme l'enonce le demande. Le fil reseau du moteur fait trois choses a chaque tour : PollSocket, UpdateConnections avec dt fixe a 0.016 seconde, puis un Sleep pour completer jusqu'a 16 millisecondes si le tour a ete plus rapide. Ce Sleep signifie que le moteur ne traite les paquets recus qu'environ soixante fois par seconde, pas en continu. C'est une contrainte de sa boucle, pas de mon programme.
-Ce rythme explique aussi pourquoi le RTT du moteur ne peut pas etre alimente par mes messages applicatifs. Le moteur n'envoie de PING que par son propre mecanisme interne, et met a jour son estimateur seulement a la reception du PONG correspondant, ligne 689 de NkReliableUDP.cpp. Mon programme n'envoie jamais de PING protocolaire, donc l'estimateur reste a zero.
+Moyenne : 22.7558
+Minimum : 12.9374
+Maximum : 33.7616
+Lissee : 17.4572
+Moteur : 21.5265
+Ecart : 1.2293
+La moyenne mesuree est de 22.76 millisecondes, et l'estimation du moteur est de 21.53 millisecondes. L'ecart est de 1.23 milliseconde, soit environ cinq pour cent. Les deux mesures decrivent le meme phenomene : le temps d'aller-retour sur la boucle locale.
+La premiere version de mon programme utilisait le canal fiable ordonne par defaut. Ses mesures tournaient autour de 250 millisecondes. J'ai d'abord cru que c'etaient mes Sleep qui dominaient. En lisant NkReliableUDP.cpp, ligne 456, j'ai vu que le RTO vaut mRTT plus quatre fois le jitter, avec un minimum de 100 millisecondes. Un ACK perdu provoque une retransmission apres ce delai. Les mesures a 100, 200, 250 millisecondes etaient des retransmissions, pas du RTT. Passer les deux SendTo en NkNetChannel::NK_NET_CHANNEL_UNRELIABLE a supprime les ACK et les retransmissions. Le RTT mesure est descendu a 22 millisecondes, et le moteur, alimente par ses propres PING toutes les 250 millisecondes, est passe de 0 a 21.5 millisecondes. L'ecart de 1.23 milliseconde vient de la difference de methode : mon client mesure le temps entre son SendTo et la reception de la reponse applicative, le moteur mesure le temps entre son PING et son PONG, qui traversent le meme fil reseau avec le meme rythme de polling a 60 FPS. Les deux tombent dans la meme fourchette, ce qui confirme que l'experience mesure bien ce qu'elle pretend mesurer.
+Le lissage applique utilise la meme formule que le moteur, SRTT = (1 - 0.125) * SRTT + 0.125 * R, avec un depart de 100 millisecondes. Il converge vers la moyenne apres environ huit echantillons, ce qui explique la valeur lissee de 17.46 millisecondes, legerement inferieure a la moyenne a cause du depart a 100.
 
 Datation de la mesure
 

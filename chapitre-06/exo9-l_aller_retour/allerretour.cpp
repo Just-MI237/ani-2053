@@ -42,16 +42,17 @@ int nkmain(const NkEntryState &state)
         }
         std::printf("Mode serveur, renvoie chaque message a son expediteur\n");
 
-        for (int t = 0; t < 400; ++t)
+        const NkTimestampMs fin = NkNetNowMs() + 60000;
+        while (NkNetNowMs() < fin)
         {
             NkVector<NkReceiveMsg> messages;
             manager.DrainAll(messages);
             for (nk_size i = 0; i < messages.Size(); ++i)
             {
                 const NkReceiveMsg& m = messages[i];
-                manager.SendTo(m.from, m.data, m.size);
+                manager.SendTo(m.from, m.data, m.size, NkNetChannel::NK_NET_CHANNEL_UNRELIABLE);
             }
-            NkChrono::SleepMilliseconds(10);
+            NkChrono::SleepMilliseconds(1);
         }
         manager.Shutdown();
     }
@@ -66,7 +67,8 @@ int nkmain(const NkEntryState &state)
         }
         std::printf("Mode client, cent allers-retours\n");
 
-        NkChrono::SleepMilliseconds(2000);
+        NkChrono::SleepMilliseconds(3000);
+
 
         FILE* fichier = std::fopen("mesures-rtt.txt", "w");
         if (!fichier)
@@ -83,10 +85,11 @@ int nkmain(const NkEntryState &state)
         {
             uint8 numero = (uint8)(k & 0xFF);
             NkChrono chrono;
-            manager.SendTo(NkPeerId::Server(), &numero, 1);
+            manager.SendTo(NkPeerId::Server(), &numero, 1, NkNetChannel::NK_NET_CHANNEL_UNRELIABLE);
 
             bool recu = false;
-            for (int t = 0; t < 200 && !recu; ++t)
+            const NkTimestampMs limite = NkNetNowMs() + 100;
+            while (!recu && NkNetNowMs() < limite)
             {
                 NkVector<NkReceiveMsg> messages;
                 manager.DrainAll(messages);
@@ -104,7 +107,7 @@ int nkmain(const NkEntryState &state)
             }
 
             double ms = chrono.Elapsed().milliseconds;
-            std::fprintf(fichier, "%.3f\n", ms);
+            std::fprintf(fichier, "%.4f\n", ms);
             somme += ms;
             if (ms < mini) mini = ms;
             if (ms > maxi) maxi = ms;
@@ -131,12 +134,12 @@ int nkmain(const NkEntryState &state)
             rttMoteur = stats.rttMs;
         }
 
-        std::printf("Moyenne : %.3f\n", moyenne);
-        std::printf("Minimum : %.3f\n", mini);
-        std::printf("Maximum : %.3f\n", maxi);
-        std::printf("Lissee : %.3f\n", srtt);
-        std::printf("Moteur : %.3f\n", (double)rttMoteur);
-        std::printf("Ecart : %.3f\n", moyenne - (double)rttMoteur);
+        std::printf("Moyenne : %.4f\n", moyenne);
+        std::printf("Minimum : %.4f\n", mini);
+        std::printf("Maximum : %.4f\n", maxi);
+        std::printf("Lissee : %.4f\n", srtt);
+        std::printf("Moteur : %.4f\n", (double)rttMoteur);
+        std::printf("Ecart : %.4f\n", moyenne - (double)rttMoteur);
 
         manager.Shutdown();
     }
