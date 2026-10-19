@@ -13,15 +13,18 @@
 #include <string>
 #include <map>
 #include <thread>
+#include <mutex>
 #include <sstream>
 
 using namespace nkentseu;
 using namespace nkentseu::net;
 
 static std::map<uint64, NkTimestampMs> derniersMessages;
+static std::mutex tableMutex;
 
 static void afficherTable(const char* titre)
 {
+    std::lock_guard<std::mutex> verrou(tableMutex);
     std::printf("[%s] table joueurs (%d) :\n", titre, (int)derniersMessages.size());
     for (const auto& paire : derniersMessages)
     {
@@ -51,7 +54,10 @@ int nkmain(const NkEntryState &state)
         NkConnectionManager manager;
 
         manager.onPeerConnected = [](NkPeerId peer) {
-            derniersMessages[peer.value] = NkNetNowMs();
+            {
+                std::lock_guard<std::mutex> verrou(tableMutex);
+                derniersMessages[peer.value] = NkNetNowMs();
+            }
             std::ostringstream tid;
             tid << std::this_thread::get_id();
             std::printf("[CONNECT] joueur %llu ajoute a la table, thread = %s\n",
@@ -63,11 +69,14 @@ int nkmain(const NkEntryState &state)
         manager.onPeerDisconnected = [](NkPeerId peer, const char* raison) {
             NkTimestampMs maintenant = NkNetNowMs();
             NkTimestampMs dernier = 0;
-            auto it = derniersMessages.find(peer.value);
-            if (it != derniersMessages.end())
             {
-                dernier = it->second;
-                derniersMessages.erase(it);
+                std::lock_guard<std::mutex> verrou(tableMutex);
+                auto it = derniersMessages.find(peer.value);
+                if (it != derniersMessages.end())
+                {
+                    dernier = it->second;
+                    derniersMessages.erase(it);
+                }
             }
             NkTimestampMs ecart = maintenant - dernier;
             std::ostringstream tid;
@@ -100,7 +109,10 @@ int nkmain(const NkEntryState &state)
             for (nk_size i = 0; i < messages.Size(); ++i)
             {
                 const NkReceiveMsg& m = messages[i];
-                derniersMessages[m.from.value] = maintenant;
+                {
+                    std::lock_guard<std::mutex> verrou(tableMutex);
+                    derniersMessages[m.from.value] = maintenant;
+                }
             }
             NkChrono::SleepMilliseconds(10);
         }
