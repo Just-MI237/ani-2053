@@ -1,14 +1,14 @@
 Constat :
-Le programme se fige. Il affiche A prend m1 puis B prend m2, et ne dit plus rien. Aucun message d'erreur, aucun plantage, aucune sortie de programme. Timeout le tue au bout de 5 secondes avec le code de sortie 124.
+Le programme se fige. Il affiche deux lignes, A prend m1 puis B prend m2, ou B prend m2 puis A prend m1 selon l'ordre d'ordonnancement, et ne dit plus rien. Aucun message d'erreur, aucun plantage, aucune sortie de programme. Lance trois fois de suite avec timeout 5, il rend le code 124 a chaque fois. Essai 1 : A prend m1, B prend m2, code 124. Essai 2 : B prend m2, A prend m1, code 124. Essai 3 : A prend m1, B prend m2, code 124. L'ordre des deux premieres lignes change, mais le figement est constant : c'est la nature meme de l'etreinte.
 
 Pause :
-Vu au debogueur gdb, apres attachement au processus fige.
-Fil A, main.cpp ligne 17, attend m2. La fonction filA tient deja m1, et essaie de prendre m2 par NkScopedLock. La pile montre NkMutex::Lock ligne 85 dans NkMutex.cpp, puis NkScopedLock ligne 174, puis filA ligne 17 dans main.cpp.
-Fil B, main.cpp ligne 26, attend m1. La fonction filB tient deja m2, et essaie de prendre m1. La pile est symetrique.
-Thread principal, main.cpp ligne 38, attend la fin du fil A par NkThread::Join. Il attendra toujours, parce que le fil A attend un verrou que le fil B ne rendra jamais.
+Vu au debogueur gdb 12.1, apres attachement au processus fige. Les numeros de ligne renvoient a la version qui se fige, reproduite ligne par ligne en commentaire au debut de etreinte.cpp.
+Fil A, ligne 17, attend m2. La fonction filA tient deja m1 depuis la ligne 14, et essaie de prendre m2 par NkScopedLock ligne 17. La pile montre NkMutex::Lock ligne 85 dans NkMutex.cpp, puis NkScopedLock ligne 174 dans NkScopedLock.h, puis filA ligne 17.
+Fil B, ligne 26, attend m1. La fonction filB tient deja m2 depuis la ligne 23, et essaie de prendre m1 par NkScopedLock ligne 26. La pile est symetrique de celle du fil A.
+Thread principal, ligne 38, attend la fin du fil A par NkThread::Join. Il attendra toujours, parce que le fil A attend un verrou que le fil B ne rendra jamais.
 
 Correction :
-Les deux fils prennent maintenant les deux verrous dans le meme ordre : m1 d'abord, m2 ensuite. Le fil A garde son ordre d'origine, le fil B prend m1 avant m2 au lieu de m2 avant m1. Les deux verrous et les deux attentes de 100 millisecondes sont gardes, conformement a la consigne. Relance trois fois de suite : le programme affiche A prend m1, A prend m2, B prend m1, B prend m2, puis Fin. Il se termine sans blocage.
+Les deux fils prennent maintenant les deux verrous dans le meme ordre : m1 d'abord, m2 ensuite. Le fil A garde son ordre d'origine. Le fil B prend m1 avant m2, au lieu de m2 avant m1. Les deux verrous et les deux attentes de 100 millisecondes sont gardes, conformement a la consigne. Relance trois fois de suite : le programme affiche A prend m1, A prend m2, B prend m1, B prend m2, puis Fin. Il se termine sans blocage, code 0 a chaque essai.
 
 Regle :
 Toujours prendre plusieurs verrous dans le meme ordre, partout dans le programme. Une fois qu'un ordre est choisi, il s'applique a tous les fils. Un fil qui prend m1 puis m2 et un autre qui prend m2 puis m1 peuvent s'attendre sans fin, parce que chacun tient ce que l'autre veut. La regle ne se verifie pas toute seule : un nouveau fil qui prend les verrous dans un autre ordre recree l'etreinte sans qu'aucun test ne le voie.
