@@ -1,16 +1,23 @@
 Coupure : 16791, 16792, 16815, 16830. Quatre coupures mesurees en millisecondes, sur quatre essais successifs. J'ai tue le processus client par kill moins neuf, puis attendu que le serveur detecte le silence. Le delai est d'environ 16.8 secondes a chaque fois, tres stable. C'est le timeout d'inactivite du framework, kNkTimeoutMs = 10000 millisecondes dans NkNetDefines.h ligne 166, plus le temps de detection par cycle de UpdateConnections.
 
-Fermeture propre : le client envoie bien un FIN explicite par manager.Disconnect avant Shutdown, avec un Sleep de 3 secondes entre les deux. Le log client confirme : FIN envoye a 127.127.127.127:127 : 127.127.127.127:127, a NkConnection.cpp ligne 313. Mais le serveur ne recoit pas ce FIN et ne declenche pas onPeerDisconnected. J'ai attendu 15 secondes cote serveur, aucun DISCONNECT n'est apparu. C'est un bug du framework, pas de mon programme. Le FIN est envoye en canal RELIABLE_ORDERED, qui exige un ACK. Le client ferme son thread reseau avant que l'ACK ne revienne, donc le FIN n'est pas retransmis s'il est perdu. Le serveur ne voit rien. Je le signale comme un defaut a corriger.
+Fermeture propre : 92. Le client appelle manager.Disconnect avant manager.Shutdown, avec un Sleep de 3 secondes entre les deux. Le FIN part, le serveur le recoit a NkConnection.cpp ligne 500, et declenche onPeerDisconnected avec un ecart de 92 millisecondes. C'est la vraie fermeture propre, dix fois plus rapide que la coupure brutale.
+Note : un second onPeerDisconnected apparait 6 secondes plus tard, avec la raison Disconnected, parce que le timeout d'inactivite se declenche encore sur la connexion deja fermee. C'est un double appel du framework, a signaler. Le joueur a deja ete retire de la table au premier appel, donc le second ne change rien a l'etat. Il faudrait que le framework ne declenche plus onPeerDisconnected sur une connexion deja retiree.
 
-Raison : raison = Disconnected pour les quatre coupures. C'est la raison transmise par le framework dans NkConnectionManager::UpdateConnections, ligne 1318 de NkConnection.cpp. Le framework ne distingue pas une coupure brutale d'une fermeture propre a ce niveau. Dans les logs, chaque coupure est precedee d'un Timeout d'inactivite a NkConnection.cpp ligne 391, ce qui confirme que le serveur a detecte l'absence de messages, pas un FIN.
+Raison : deux raisons observees. Pour la fermeture propre, raison = Force disconnected, transmise par NkConnection::ForceDisconnect quand le FIN est recu (NkConnection.cpp ligne 335). Pour la coupure brutale, raison = Disconnected, transmise par NkConnectionManager::UpdateConnections (NkConnection.cpp ligne 1318). Le framework distingue donc bien les deux cas par la raison.
 
-Table : avant coupure, la table contient un joueur. Pendant la coupure, le joueur reste dans la table jusqu'au timeout. Apres le timeout, le joueur est retire et la table revient a zero. Les logs complets montrent chaque ajout et chaque retrait. Extrait :
+Table : avant coupure, la table contient un joueur. Pendant la coupure, le joueur reste dans la table jusqu'au timeout. Apres le timeout, le joueur est retire et la table revient a zero. Pour la fermeture propre, le joueur est retire en 92 millisecondes. Les logs complets montrent chaque ajout et chaque retrait. Extraits :
+Fermeture propre :
+[CONNECT] joueur 6148199952849176231 ajoute a la table, thread = 140038961919552
+[2026-10-20 00:09:20.149] FIN recu de 127.127.127.127:127 - deconnexion
+[DISCONNECT] joueur 6148199952849176231 retire, raison = Force disconnected, ecart = 92 ms, thread = 140038961919552
+[DISCONNECT] joueur 6148199952849176231 retire, raison = Disconnected, ecart = 6011 ms, thread = 140038961919552
+
+Coupure brutale :
 [CONNECT] joueur 4298217312260146839 ajoute a la table, thread = 126735091004992
-[apres ajout] table joueurs (1)
+[2026-10-19 23:56:03.195] Timeout d'inactivite - deconnexion
 [DISCONNECT] joueur 4298217312260146839 retire, raison = Disconnected, ecart = 16830 ms, thread = 126735091004992
-[apres retrait] table joueurs (0)
 
-Fil : le fil qui appelle onPeerDisconnected est le fil reseau du manager. Je l'ai verifie par la mesure. Le programme affiche le thread id dans le main et dans les callbacks. Sur un essai, le main affiche thread = 126735098234688, et les callbacks affichent thread = 126735091004992. Les deux valeurs sont differentes, donc onPeerDisconnected n'est pas appele depuis le fil principal. C'est le fil cree par StartServer a NkConnection.cpp ligne 935, qui execute NetThreadLoop ligne 1207, qui appelle UpdateConnections ligne 1219, qui detecte les connexions deconnectees et declenche le callback lignes 1317 et 1318.
+Fil : le fil qui appelle onPeerDisconnected est le fil reseau du manager. Je l'ai verifie par la mesure. Le programme affiche le thread id dans le main et dans les callbacks. Sur un essai, le main affiche thread = 126735098234688, et les callbacks affichent thread = 126735091004992. Les deux valeurs sont differentes, donc onPeerDisconnected n'est pas appele depuis le fil principal. C'est le fil cree par StartServer a NkConnection.cpp ligne 935, qui execute NetThreadLoop ligne 1207, qui appelle UpdateConnections ligne 1219, qui detecte les connexions deconnectees et declenche le callback lignes 1317 et 1318. Pour la fermeture propre, le FIN est traite dans DispatchPacket ligne 499, qui appelle ForceDisconnect ligne 335, toujours dans le meme fil reseau.
 Ce que cela impose a la table : elle est modifiee depuis un fil qui n'est pas celui du programme principal, donc toute lecture ou ecriture concurrente doit etre protegee. Mon programme utilise std::map sans mutex, ce qui est une course potentielle. Je le signale comme un defaut a corriger.
 
 Datation de la mesure
