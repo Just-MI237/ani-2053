@@ -12,6 +12,8 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <thread>
+#include <sstream>
 
 using namespace nkentseu;
 using namespace nkentseu::net;
@@ -50,8 +52,10 @@ int nkmain(const NkEntryState &state)
 
         manager.onPeerConnected = [](NkPeerId peer) {
             derniersMessages[peer.value] = NkNetNowMs();
-            std::printf("[CONNECT] joueur %llu ajoute a la table\n",
-                        (unsigned long long)peer.value);
+            std::ostringstream tid;
+            tid << std::this_thread::get_id();
+            std::printf("[CONNECT] joueur %llu ajoute a la table, thread = %s\n",
+                        (unsigned long long)peer.value, tid.str().c_str());
             afficherTable("apres ajout");
             std::fflush(stdout);
         };
@@ -66,10 +70,13 @@ int nkmain(const NkEntryState &state)
                 derniersMessages.erase(it);
             }
             NkTimestampMs ecart = maintenant - dernier;
-            std::printf("[DISCONNECT] joueur %llu retire, raison = %s, ecart = %llu ms\n",
+            std::ostringstream tid;
+            tid << std::this_thread::get_id();
+            std::printf("[DISCONNECT] joueur %llu retire, raison = %s, ecart = %llu ms, thread = %s\n",
                         (unsigned long long)peer.value,
                         raison ? raison : "(aucune)",
-                        (unsigned long long)ecart);
+                        (unsigned long long)ecart,
+                        tid.str().c_str());
             afficherTable("apres retrait");
             std::fflush(stdout);
         };
@@ -80,7 +87,9 @@ int nkmain(const NkEntryState &state)
             std::printf("StartServer echoue : code %d\n", (int)r);
             return 1;
         }
-        std::printf("Mode serveur, table des joueurs active\n");
+        std::ostringstream tid;
+        tid << std::this_thread::get_id();
+        std::printf("Mode serveur, table des joueurs active, thread main = %s\n", tid.str().c_str());
         std::fflush(stdout);
 
         for (int t = 0; t < 8000; ++t)
