@@ -1,0 +1,36 @@
+Liste :
+Mode client, ecoute 6 secondes
+[2026-10-19 22:43:01.918] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #0 bufSize=0 valid=0
+[2026-10-19 22:43:01.929] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #1 bufSize=1 valid=1
+[2026-10-19 22:43:01.939] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #2 bufSize=2 valid=2
+[2026-10-19 22:43:01.950] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #3 bufSize=3 valid=3
+[2026-10-19 22:43:01.961] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #4 bufSize=4 valid=4
+[2026-10-19 22:43:01.971] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #5 bufSize=5 valid=5
+[2026-10-19 22:43:01.982] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #6 bufSize=6 valid=6
+[2026-10-19 22:43:01.993] [INF] [default] [NkSocket.cpp:771 in RecvFrom] -> [NKNet] [NET-DIAG] RecvFrom enter #7 bufSize=7 valid=7
+[2026-10-19 22:43:02.922] [INF] [default] [NkSocket.cpp:837 in RecvFrom] -> [NKNet] [NET-DIAG] recvfrom #0 <- 0 (0 bytes)
+[2026-10-19 22:43:04.927] [INF] [default] [NkSocket.cpp:837 in RecvFrom] -> [NKNet] [NET-DIAG] recvfrom #1 <- 1 (1 bytes)
+[2026-10-19 22:43:06.924] [INF] [default] [NkSocket.cpp:837 in RecvFrom] -> [NKNet] [NET-DIAG] recvfrom #2 <- 2 (2 bytes)
+Listen resultat = 0, 3 serveur(s) trouve(s)
+Serveur 1 : adresse = 172.172.172.172:172, nom = Serveur Test, maxPlayers = 16
+Serveur 2 : adresse = 172.172.172.172:172, nom = Serveur Test, maxPlayers = 16
+Serveur 3 : adresse = 172.172.172.172:172, nom = Serveur Test, maxPlayers = 16
+
+Apparitions :
+Le serveur "Serveur Test" figure trois fois dans la liste. Les trois lignes affichent la meme adresse 172.172.172.172:172, mais ce n'est qu'un artefact de l'affichage ToString. En interne, les trois adresses sont differentes par leur port source. Si elles avaient ete identiques, la deduplication de Listen les aurait fusionnees et il n'y aurait qu'une seule entree.
+
+Pourquoi :
+Le nombre d'apparitions s'explique en lisant le code de NkDiscovery::Broadcast et de NkDiscovery::Listen dans NkLobby.cpp.
+Dans Broadcast (ligne 924), un nouveau NkSocket est cree a chaque appel, avec NkAddress::Any(0). Le port 0 veut dire que l'OS choisit un port source libre, different a chaque appel. Le socket est ferme a la fin de l'appel.
+Dans Listen (ligne 968), chaque paquet recu est associe a l'adresse source lue par RecvFrom, donc IP source plus port source. La deduplication compare les adresses completes par NkAddress::operator==, qui compare famille, port et octets IP.
+Comme le port source change a chaque diffusion, chaque diffusion arrive avec une adresse source differente. Listen les voit donc comme des serveurs distincts et les ajoute tous a la liste.
+Le serveur a diffuse trois fois pendant les six secondes d'ecoute du client : une diffusion au demarrage, puis une toutes les deux secondes. Le client a donc recu trois paquets, et la liste contient trois entrees. Avec une diffusion toutes les deux secondes et une ecoute de six secondes, on obtient trois apparitions. C'est exactement ce que l'experience montre.
+
+Machines :
+Une seule machine, sous WSL. Le serveur et le client sont lances dans deux processus distincts du meme shell. Le serveur diffuse sur 255.255.255.255:7778, le client ecoute sur le port 7778 en mode broadcast. Les deux processus utilisent la meme pile reseau locale.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 039421b1 2026-10-15
+Version Jenga : 2.9.0.
