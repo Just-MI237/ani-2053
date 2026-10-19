@@ -1,11 +1,9 @@
 // Datation de la mesure
 //
 // Commande : git log -1 --format="%h %ad" --date=short
-// Sortie brute : 9c3fad33 2026-09-13
-// Version Jenga : 2.8.0.
+// Sortie brute : 039421b1 2026-10-15
+// Version Jenga : 2.9.0.
 //
-// Note : le clone Nkentseu a ete mis a jour a 039421b1 du 2026-10-15
-// apres la premiere mesure. Les valeurs sont reproductibles.
 #include "NKWindow/NKMain.h"
 #include "NKCanvas/App/NkCanvasApp.h"
 #include "NKCanvas/Renderer/Core/NkIRenderer2D.h"
