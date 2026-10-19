@@ -10,6 +10,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <string>
 
 using namespace nkentseu;

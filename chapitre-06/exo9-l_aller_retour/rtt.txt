@@ -3,7 +3,22 @@ Minimum : 235.258
 Maximum : 257.899
 Lissee : 247.871
 Moteur : 0.000
-Ecart : La moyenne mesuree est de 250 millisecondes, alors que l'estimation du moteur est de 0 milliseconde. L'ecart est enorme, et il vient de mon programme, pas du moteur. Mon serveur traite les messages par tours, avec NkChrono::SleepMilliseconds(10) entre chaque tour. Mon client, apres chaque envoi, attend la reponse dans une boucle qui dort 1 milliseconde entre deux DrainAll. Pour un aller-retour local, le temps reseau reel est de l'ordre de la dizaine de microsecondes. Ce sont mes deux attentes qui dominent le temps mesure, pas le reseau. Le moteur, lui, mesure le RTT dans son propre fil reseau, sans attente artificielle, donc il voit la vraie valeur, proche de zero en local. Mon experience ne mesure pas ce qu'elle pretend mesurer. Pour la corriger, il faudrait que le client n'attende pas avec Sleep entre deux DrainAll, mais lise la file en continu, et que le serveur traite les messages des qu'ils arrivent, sans Sleep. Je signale ce defaut plutot que de le masquer.
+Ecart :
+L'estimation du moteur est de 0 milliseconde parce qu'elle n'est jamais alimentee. Le moteur met a jour son RTT dans NkReliableUDP.cpp ligne 689, dans un bloc qui traite les paquets de controle :
+
+if ((header.flags & kFlagPing) != 0) {
+    if (mPingSentAt != 0) {
+        const float32 rtt = static_cast<float32>(NkNetNowMs() - mPingSentAt);
+        mRTT.Update(rtt);
+        mPingSentAt = 0;
+    }
+    return;
+}
+
+La mise a jour n'a lieu qu'a la reception d'un PONG, c'est-a-dire d'un paquet de reponse a un PING. Mon programme n'envoie jamais de PING. Il envoie un octet numerote et attend le meme octet en retour, par le meme canal fiable. Ce n'est pas un PING du protocole, c'est un message applicatif. Le moteur ne voit donc aucun echantillon RTT, et son estimateur reste a sa valeur initiale, 0.
+Ma mesure, elle, est de 250 millisecondes en moyenne. Mais ce n'est pas le RTT du reseau. Mon serveur traite les messages par tours, avec NkChrono::SleepMilliseconds(10) entre chaque tour. Mon client, apres chaque envoi, attend la reponse dans une boucle qui dort 1 milliseconde entre deux DrainAll. Pour un aller-retour local, le temps reseau reel est de l'ordre de la dizaine de microsecondes. Ce sont mes deux attentes qui dominent le temps mesure, pas le reseau.
+La formule de lissage que j'applique est la meme que celle du moteur, alpha = 0.125, avec un depart a 100 millisecondes. Elle donne 247.871 parce que les cent mesures tournent toutes autour de 250. Le moteur, lui, utilise la meme formule dans NkReliableUDP.h ligne 385, kAlpha = 0.125f, mais il ne l'applique jamais faute d'echantillon.
+L'ecart de 250 millisecondes n'est donc pas un ecart entre deux mesures du meme phenomene. C'est la difference entre une mesure dominee par mes attentes artificielles et une estimation qui n'a jamais recu d'echantillon. Pour corriger, il faudrait deux choses : envoyer un vrai PING du protocole pour alimenter le RTT du moteur, et supprimer les Sleep dans mon experience pour mesurer le vrai temps reseau.
 
 Datation de la mesure
 
