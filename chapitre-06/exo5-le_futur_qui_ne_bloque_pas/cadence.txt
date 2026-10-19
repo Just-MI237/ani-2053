@@ -1,8 +1,8 @@
-Image : grande-photo.jpg, 2752 sur 1536, 2993987 octets, temps de chargement 208.676 ms.
-Get : 225.886 ms, 0 trames.
-IsReady : 0.057 ms, 13 trames.
+Image : grande-photo.jpg, 2752 sur 1536, 2993987 octets, temps de chargement 223.114 ms en version IsReady.
+Get : 200.416 ms, 0 trames.
+IsReady : 0.038 ms, 14 trames.
 Ce qu'on voit :
-En version Get, le carre s'arrete net pendant le chargement. La trame la plus longue mesure 225.886 millisecondes, et aucune trame n'est dessinee pendant ce temps. Le carre reprend apres le chargement, mais le joueur a vu un gel d'un quart de seconde. En version IsReady, la trame la plus longue reste a 0.057 milliseconde, et treize trames sont dessinees pendant le chargement. Le carre continue d'avancer sans interruption, comme si le chargement n'existait pas. La difference est exactement celle que l'enonce annonce : Get bloque le fil principal sur toute la duree du chargement, IsReady demande a chaque trame si le resultat est pret et ne bloque jamais.
+En version Get, futur.Get() est appele juste apres le lancement. Il bloque le fil principal jusqu'a ce que le chargement soit termine. La trame la plus longue mesure 200.416 millisecondes, et aucune trame n'est dessinee pendant ce temps. Le carre s'arrete net, puis reprend apres le chargement. Le joueur a vu un gel d'un cinquieme de seconde. En version IsReady, la boucle demande futur.IsReady() a chaque trame, et appelle futur.Get() seulement quand la reponse est vraie. La trame la plus longue reste a 0.038 milliseconde, et quatorze trames sont dessinees pendant le chargement. Le carre continue d'avancer sans interruption. La difference est exactement celle que l'enonce annonce : Get bloque le fil principal, IsReady ne bloque jamais.
 
 Datation de la mesure
 

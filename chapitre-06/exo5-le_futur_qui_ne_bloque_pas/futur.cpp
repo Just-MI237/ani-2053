@@ -83,10 +83,7 @@ class TestFutur : public NkCanvasApp
 
                 if (VERSION == 0)
                 {
-                    while (!mFuture.IsReady())
-                    {
-                        nkentseu::NkChrono::SleepMilliseconds(1);
-                    }
+                    mFuture.Get();
                     mChargementTermine = true;
                     mFinChargement = mChronoGlobal.Elapsed().milliseconds;
                 }
@@ -96,6 +93,7 @@ class TestFutur : public NkCanvasApp
             {
                 if (mFuture.IsReady())
                 {
+                    mFuture.Get();
                     mChargementTermine = true;
                     mFinChargement = mChronoGlobal.Elapsed().milliseconds;
                 }
