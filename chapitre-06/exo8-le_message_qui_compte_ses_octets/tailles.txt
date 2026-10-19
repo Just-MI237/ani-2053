@@ -1,0 +1,17 @@
+Types complets : 18 octets
+Quantifie : 8 octets
+Ecart maximal :
+vivant : 0
+numero : 0
+x : 0.0000
+y : 0.0000
+angle : 0.0000
+sante : 0
+Ce que le joueur verrait :
+Les six champs se relisent exactement a l'identique, avec un ecart nul partout. Cela peut surprendre pour un paquet quantifie, qui jette de la precision par construction. La raison est que les valeurs choisies tombent pile sur la grille de quantification. X vaut 123.45 metres, ce qui est un multiple exact du centimetre demande par WriteF32Q avec une precision de 0.01. Y vaut -67.89, aussi un multiple exact. L'angle vaut 47.5 degres, un multiple exact du demi-degre demande. La sante vaut 73, un entier exact entre 0 et 100. Le paquet quantifie envoie donc les memes valeurs que le paquet complet, et les ecarts sont nuls. Si j'avais choisi X egal a 123.456, le centimetre le plus proche serait 123.46, et l'ecart serait de 0.004 metre, soit quatre millimetres. Un joueur ne verrait pas quatre millimetres sur un personnage de deux metres. Pour l'angle, un demi-degre d'ecart se voit a peine, meme sur une longue portee. Pour la sante, un entier perdu se verrait, mais la quantification en entier ne perd rien tant que la valeur est entiere. Le paquet quantifie divise la taille par deux et ne perd rien de visible. C'est le compromis que le chapitre decrit: envoyer juste assez de precision.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 039421b1 2026-10-15
+Version Jenga : 2.9.0.
