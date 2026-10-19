@@ -1,0 +1,20 @@
+Coupure : 16791, 16792, 16815. Les trois coupures sont mesurees en millisecondes. J'ai tue le processus client par kill moins neuf, puis attendu que le serveur detecte le silence. Le delai est d'environ 16.8 secondes, coherent avec le timeout d'inactivite du framework, kNkTimeoutMs = 10000 millisecondes dans NkNetDefines.h ligne 166, plus le temps de detection par cycle de UpdateConnections.
+
+Fermeture propre : non mesuree. J'ai lance un quatrieme client qui devait appeler Shutdown proprement, mais le serveur a ete tue avant que le FIN n'arrive et que onPeerDisconnected ne se declenche. Le quatrieme client, joueur 8453412595375604203, etait encore dans la table au moment de l'arret du serveur. C'est un point que je n'ai pas pu mesurer dans le temps disponible.
+
+Raison : raison = Disconnected pour les trois coupures. C'est la raison transmise par le framework dans NkConnectionManager::UpdateConnections, ligne 1318 de NkConnection.cpp. Le framework ne distingue pas une coupure brutale d'une fermeture propre a ce niveau. Pour distinguer, il faudrait verifier si NkConnection recoit un FIN ou si c'est un timeout d'inactivite. Dans les logs, les trois coupures sont precedees d'un Timeout d'inactivite a NkConnection.cpp ligne 391, ce qui confirme que le serveur a detecte l'absence de messages, pas un FIN.
+
+Table : avant coupure, la table contient un joueur. Pendant la coupure, le joueur reste dans la table jusqu'au timeout. Apres le timeout, le joueur est retire et la table revient a zero. Les logs complets montrent chaque ajout et chaque retrait. Extrait :
+[CONNECT] joueur 2788689835974807420 ajoute a la table
+[apres ajout] table joueurs (1)
+[DISCONNECT] joueur 2788689835974807420 retire, raison = Disconnected, ecart = 16791 ms
+[apres retrait] table joueurs (0)
+
+Fil : le fil qui appelle onPeerDisconnected est le fil reseau du manager, cree par StartServer a NkConnection.cpp ligne 935. C'est le fil qui execute NetThreadLoop, ligne 1207, qui appelle UpdateConnections, ligne 1219, qui detecte les connexions deconnectees et declenche le callback, lignes 1317 et 1318. Je l'ai trouve en lisant le code : onPeerDisconnected n'est jamais appele depuis le fil principal, seulement depuis la boucle UpdateConnections du fil reseau.
+Ce que cela impose a la table : elle est modifiee depuis un fil qui n'est pas celui du programme principal, donc toute lecture ou ecriture concurrente doit etre protegee. Mon programme utilise std::map sans mutex, ce qui est une course potentielle. Je le signale comme un defaut a corriger, sans l'avoir corrige dans le temps disponible.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 039421b1 2026-10-15
+Version Jenga : 2.9.0.
