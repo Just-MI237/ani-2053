@@ -1,0 +1,11 @@
+Image : grande-photo.jpg, 2752 sur 1536, 2993987 octets, temps de chargement 208.676 ms.
+Get : 225.886 ms, 0 trames.
+IsReady : 0.057 ms, 13 trames.
+Ce qu'on voit :
+En version Get, le carre s'arrete net pendant le chargement. La trame la plus longue mesure 225.886 millisecondes, et aucune trame n'est dessinee pendant ce temps. Le carre reprend apres le chargement, mais le joueur a vu un gel d'un quart de seconde. En version IsReady, la trame la plus longue reste a 0.057 milliseconde, et treize trames sont dessinees pendant le chargement. Le carre continue d'avancer sans interruption, comme si le chargement n'existait pas. La difference est exactement celle que l'enonce annonce : Get bloque le fil principal sur toute la duree du chargement, IsReady demande a chaque trame si le resultat est pret et ne bloque jamais.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.
