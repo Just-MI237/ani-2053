@@ -18,9 +18,9 @@ using namespace nkentseu::net;
 
 static const bool VIVANT = true;
 static const uint8 NUMERO = 42;
-static const float X = 123.45f;
-static const float Y = -67.89f;
-static const float ANGLE = 47.5f;
+static const float X = 123.456f;
+static const float Y = -67.891f;
+static const float ANGLE = 47.3f;
 static const int32 SANTE = 73;
 
 static void ecrireComplet(uint8* buffer, uint32& taille)
