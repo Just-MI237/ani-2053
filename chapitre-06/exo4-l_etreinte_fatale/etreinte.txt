@@ -7,6 +7,21 @@ Fil A, ligne 17, attend m2. La fonction filA tient deja m1 depuis la ligne 14, e
 Fil B, ligne 26, attend m1. La fonction filB tient deja m2 depuis la ligne 23, et essaie de prendre m1 par NkScopedLock ligne 26. La pile est symetrique de celle du fil A.
 Thread principal, ligne 38, attend la fin du fil A par NkThread::Join. Il attendra toujours, parce que le fil A attend un verrou que le fil B ne rendra jamais.
 
+Sortie brute de gdb, thread apply all bt sur le processus fige, lignes utiles seulement :
+
+Thread 3 (Thread 0x7a4bbc7fe640 (LWP 4284) "TestEtreinte"):
+#4  nkentseu::threading::NkMutex::Lock (this=0x6243bd05e4a0 <m1>) at NkMutex.cpp:85
+#6  filB () at Applications/TestEtreinte/src/main.cpp:26
+
+Thread 2 (Thread 0x7a4bbcfff640 (LWP 4283) "TestEtreinte"):
+#4  nkentseu::threading::NkMutex::Lock (this=0x6243bd05e4d0 <m2>) at NkMutex.cpp:85
+#6  filA () at Applications/TestEtreinte/src/main.cpp:17
+
+Thread 1 (Thread 0x7a4bbd312740 (LWP 4280) "TestEtreinte"):
+#5  nkmain (state=...) at Applications/TestEtreinte/src/main.cpp:38
+
+Le fil B est bloque en attendant m1, qu'il n'a pas. Le fil A est bloque en attendant m2, qu'il n'a pas. Chacun tient ce que l'autre veut. Le thread principal attend la fin de A au Join, ligne 38, et n'y arrivera jamais.
+
 Correction :
 Les deux fils prennent maintenant les deux verrous dans le meme ordre : m1 d'abord, m2 ensuite. Le fil A garde son ordre d'origine. Le fil B prend m1 avant m2, au lieu de m2 avant m1. Les deux verrous et les deux attentes de 100 millisecondes sont gardes, conformement a la consigne. Relance trois fois de suite : le programme affiche A prend m1, A prend m2, B prend m1, B prend m2, puis Fin. Il se termine sans blocage, code 0 a chaque essai.
 
