@@ -1,0 +1,22 @@
+Serveur :
+Mode serveur, port 7777
+Pair connecte : value = 14584012700970208348
+Message recu de value = 14584012700970208348 : bonjour du client
+
+Client :
+Mode client, vers 127.0.0.1:7777
+Pair connecte : value = 1
+SendTo vers value = 1, resultat = 0
+
+Pair :
+Cote client, value = 1. C'est l'identifiant reserve au serveur, defini par NkPeerId::Server(). Le client voit toujours le serveur avec cette valeur fixe.
+Cote serveur, value = 14584012700970208348. C'est l'identifiant genere pour ce client precis par NkPeerId::Generate() au moment de la connexion. Un autre client aurait une autre valeur. C'est ce qui permet au serveur de distinguer plusieurs joueurs.
+
+Machines :
+Une seule machine, sous WSL. Les deux programmes sont lances dans deux processus distincts du meme shell. Le serveur ecoute sur 0.0.0.0:7777, le client se connecte a 127.0.0.1:7777. L'echange passe par la pile reseau locale, sans traverser de cable. La connexion est etablie en deux temps: le serveur demarre en premier, puis le client se connecte deux secondes plus tard, ce qui laisse le temps au handshake a trois voies de se terminer avant l'envoi du message.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 039421b1 2026-10-15
+Version Jenga : 2.9.0.
