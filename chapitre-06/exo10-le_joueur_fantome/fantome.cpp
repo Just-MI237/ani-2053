@@ -128,7 +128,9 @@ int nkmain(const NkEntryState &state)
             NkChrono::SleepMilliseconds(100);
         }
 
-        std::printf("Fermeture propre par Shutdown\n");
+        std::printf("Fermeture propre, envoi du FIN explicite\n");
+        manager.Disconnect(NkPeerId::Server(), "client shutdown");
+        NkChrono::SleepMilliseconds(3000);
         manager.Shutdown();
     }
     else
