@@ -3,12 +3,12 @@ Quantifie : 8 octets
 Ecart maximal :
 vivant : 0
 numero : 0
-x : 0.0000
-y : 0.0000
-angle : 0.0000
+x : 0.0040
+y : 0.0010
+angle : 0.2000
 sante : 0
 Ce que le joueur verrait :
-Les six champs se relisent exactement a l'identique, avec un ecart nul partout. Cela peut surprendre pour un paquet quantifie, qui jette de la precision par construction. La raison est que les valeurs choisies tombent pile sur la grille de quantification. X vaut 123.45 metres, ce qui est un multiple exact du centimetre demande par WriteF32Q avec une precision de 0.01. Y vaut -67.89, aussi un multiple exact. L'angle vaut 47.5 degres, un multiple exact du demi-degre demande. La sante vaut 73, un entier exact entre 0 et 100. Le paquet quantifie envoie donc les memes valeurs que le paquet complet, et les ecarts sont nuls. Si j'avais choisi X egal a 123.456, le centimetre le plus proche serait 123.46, et l'ecart serait de 0.004 metre, soit quatre millimetres. Un joueur ne verrait pas quatre millimetres sur un personnage de deux metres. Pour l'angle, un demi-degre d'ecart se voit a peine, meme sur une longue portee. Pour la sante, un entier perdu se verrait, mais la quantification en entier ne perd rien tant que la valeur est entiere. Le paquet quantifie divise la taille par deux et ne perd rien de visible. C'est le compromis que le chapitre decrit: envoyer juste assez de precision.
+Les trois champs discrets se relisent exactement : vivant, numero et sante n'ont aucun ecart, parce que le paquet quantifie les envoie sans perte, un bool, un octet, un entier entre 0 et 100. Les deux positions et l'angle ont un ecart, parce que le paquet quantifie les arrondit a la grille demandee. X vaut 123.456 metres a l'envoi, et 123.46 a la relecture, l'ecart est de 4 millimetres. Y vaut -67.891 a l'envoi, et -67.89 a la relecture, 1 millimetre. L'angle vaut 47.3 degres a l'envoi, et 47.5 a la relecture, 2 dixiemes de degre. Ces trois ecarts correspondent exactement aux precisions demandees, 1 centimetre pour les positions, un demi-degre pour l'angle. Le paquet quantifie divise la taille par deux, 8 octets contre 18, et ne perd rien de visible. Quatre millimetres sur un personnage de deux metres ne se voient pas. Deux dixiemes de degre sur une orientation ne se voient pas non plus. La sante et le numero, qui sont des informations ou une erreur se verrait, sont envoyes sans perte. C'est le compromis que le chapitre decrit, envoyer juste assez de precision pour ce que le joueur peut percevoir, et rien de plus.
 
 Datation de la mesure
 
