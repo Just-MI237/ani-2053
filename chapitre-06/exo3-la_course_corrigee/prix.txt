@@ -1,0 +1,15 @@
+Sans protection : 2105714 19.455
+Mutex : 8000000 806.788
+Atomique : 8000000 127.668
+Local : 8000000 5.078
+
+La moins chere : Local, 5.078 millisecondes pour 8 millions, contre 127.668 pour l'atomique et 806.788 pour le mutex. La version sans protection tourne en 19.455 millisecondes mais donne un total faux.
+
+Pourquoi :
+La version sans protection ne paie rien, mais elle est fausse. Le mutex paie l'attente a chaque incremente : un million de fois par fil, huit fils, cela fait huit millions de prises et de levers de verrou, et chaque prise attend que les autres aient fini. L'atomique paie une operation materielle qui force l'ordre entre les coeurs, sans bloquer, ce qui est beaucoup moins cher qu'un verrou. Le local ne paie rien, parce que chaque fil compte dans sa propre memoire et personne ne se dispute la meme donnee. Les huit totaux locaux s'additionnent apres les Join, dans le fil principal, sans aucune synchronisation. Le prix paye par chaque version est exactement ce qu'elle partage : le mutex partage un verrou, l'atomique partage une variable mais par une operation dediee, le local ne partage rien pendant le calcul.
+
+Datation de la mesure
+
+Commande : git log -1 --format="%h %ad" --date=short
+Sortie brute : 9c3fad33 2026-09-13
+Version Jenga : 2.8.0.
