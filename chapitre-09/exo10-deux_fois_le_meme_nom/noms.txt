@@ -1,0 +1,2 @@
+name : NkWindow, file : Kernel/Window/NkWindow.h, line : 24
+name : NkWindow, file : Kernel/Window/Platform/NkXLibWindow.h, line : 15

@@ -1,0 +1,8 @@
+Comment j'ai compté :
+Nettoyage du Build et grep -c "warning".
+
+Où était le mien :
+Dans src/main.cpp ligne 42.
+
+Ce que coûte la vérification :
+15 minutes de compilation complète.

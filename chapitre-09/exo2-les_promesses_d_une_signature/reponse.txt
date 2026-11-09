@@ -1,0 +1,8 @@
+La promesse la plus forte :
+Le const final est la promesse la plus forte, vérifiée par le compilateur.
+
+Le message du compilateur :
+error: passing 'const nkref::NkRefView' as 'this' argument discards qualifiers
+
+Une promesse que la signature ne dit pas :
+Que la méthode ne modifiera pas l'état global.

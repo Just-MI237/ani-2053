@@ -1,0 +1,8 @@
+Le premier mérite-t-il le nom :
+Oui, c'est la classe de base.
+
+Le second mérite-t-il le nom :
+Non, c'est l'implémentation X11.
+
+Le renommage le moins cher :
+Renommer le second (NkXLibWindow), moins cité.
